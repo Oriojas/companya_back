@@ -1,0 +1,948 @@
+{
+  "metadata": {
+    "created_at": "2025-11-21T18:02:59.634901",
+    "description": "Registro de transacciones NFT Servicios",
+    "network": "Arbitrum Sepolia",
+    "contract_address": "0xFF2E077849546cCB392f9e38B716A40fDC451798",
+    "version": "1.0.0",
+    "last_updated": "2025-11-21T20:40:11.863674",
+    "total_transactions": 43
+  },
+  "transactions": [
+    {
+      "timestamp": "2025-11-21T20:40:11.861737",
+      "transaction_hash": "73d17a9c093a1f128d85b82b218e6c240226aa3270fcd0df44c6c57b11858221",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/73d17a9c093a1f128d85b82b218e6c240226aa3270fcd0df44c6c57b11858221",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 0,
+        "estado": 1,
+        "transactionHash": "73d17a9c093a1f128d85b82b218e6c240226aa3270fcd0df44c6c57b11858221",
+        "blockNumber": 217657734,
+        "gasUsed": 146699,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217657734,
+      "gas_used": 146699,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T20:40:08.969650",
+      "transaction_hash": "6bc9421e779b6a0fc5bd6f2f2593da8905bdfa6090be6184144d494684da31f6",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/6bc9421e779b6a0fc5bd6f2f2593da8905bdfa6090be6184144d494684da31f6",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 2,
+        "nuevaURI": "ipfs://QmTestURIEncontrado123456789"
+      },
+      "result": {
+        "estado": 2,
+        "transactionHash": "6bc9421e779b6a0fc5bd6f2f2593da8905bdfa6090be6184144d494684da31f6",
+        "blockNumber": 217657724,
+        "gasUsed": 92450,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217657724,
+      "gas_used": 92450,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T20:40:06.656232",
+      "transaction_hash": "28514a7782981a6b55bf004e2ca0bf3e6a33d6facba089cb2878ed2df371b7fb",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/28514a7782981a6b55bf004e2ca0bf3e6a33d6facba089cb2878ed2df371b7fb",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 1,
+        "nuevaURI": "ipfs://QmTestURICreado123456789"
+      },
+      "result": {
+        "estado": 1,
+        "transactionHash": "28514a7782981a6b55bf004e2ca0bf3e6a33d6facba089cb2878ed2df371b7fb",
+        "blockNumber": 217657716,
+        "gasUsed": 47560,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217657716,
+      "gas_used": 47560,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:29:02.600118",
+      "transaction_hash": "118528ed20f55b3489afae57e1ac9c7653c265b0c21f17cca33c40c3544ff993",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/118528ed20f55b3489afae57e1ac9c7653c265b0c21f17cca33c40c3544ff993",
+      "function": "marcarComoPagado",
+      "parameters": {
+        "tokenId": 11
+      },
+      "result": {
+        "tokenId": 11,
+        "tokenIdEvidencia": 12,
+        "transactionHash": "118528ed20f55b3489afae57e1ac9c7653c265b0c21f17cca33c40c3544ff993",
+        "blockNumber": 217627412,
+        "gasUsed": 166280,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627412,
+      "gas_used": 166280,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:59.538198",
+      "transaction_hash": "4538b95d862ba6f4b381ab6121e646ae422d3a97cfbf785678b67700a816fa73",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/4538b95d862ba6f4b381ab6121e646ae422d3a97cfbf785678b67700a816fa73",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 11,
+        "nuevoEstado": 4,
+        "calificacion": 5
+      },
+      "result": {
+        "estadoAnterior": 3,
+        "nuevoEstado": 4,
+        "transactionHash": "4538b95d862ba6f4b381ab6121e646ae422d3a97cfbf785678b67700a816fa73",
+        "blockNumber": 217627401,
+        "gasUsed": 56076,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627401,
+      "gas_used": 56076,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:57.450272",
+      "transaction_hash": "8632511342f1d97c58ca1da06bcdcfed5d8fe10496e290eb7103dee7dc33d8be",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/8632511342f1d97c58ca1da06bcdcfed5d8fe10496e290eb7103dee7dc33d8be",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 11,
+        "nuevoEstado": 3,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 2,
+        "nuevoEstado": 3,
+        "transactionHash": "8632511342f1d97c58ca1da06bcdcfed5d8fe10496e290eb7103dee7dc33d8be",
+        "blockNumber": 217627391,
+        "gasUsed": 36070,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627391,
+      "gas_used": 36070,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:54.798326",
+      "transaction_hash": "6649ca4412299b4a3d79b36e71b861c92b397df7d5a52d748121a6e90850024c",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/6649ca4412299b4a3d79b36e71b861c92b397df7d5a52d748121a6e90850024c",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 11,
+        "nuevoEstado": 2,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 1,
+        "nuevoEstado": 2,
+        "transactionHash": "6649ca4412299b4a3d79b36e71b861c92b397df7d5a52d748121a6e90850024c",
+        "blockNumber": 217627382,
+        "gasUsed": 92008,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627382,
+      "gas_used": 92008,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:52.110598",
+      "transaction_hash": "cbe5cb79dc3447cc3c34d97c4cbb14701a52601dca8a0cd70b62f7d62cbf7858",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/cbe5cb79dc3447cc3c34d97c4cbb14701a52601dca8a0cd70b62f7d62cbf7858",
+      "function": "asignarAcompanante",
+      "parameters": {
+        "tokenId": 11,
+        "acompanante": "0x742D35cc6634c0532925A3B8d4b6a5f6c6d5b7C8"
+      },
+      "result": {
+        "tokenId": 11,
+        "transactionHash": "cbe5cb79dc3447cc3c34d97c4cbb14701a52601dca8a0cd70b62f7d62cbf7858",
+        "blockNumber": 217627372,
+        "gasUsed": 46487,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627372,
+      "gas_used": 46487,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:49.262296",
+      "transaction_hash": "85ac05e11171d33f3aa2bcdeb7e2eecca5134f75bd21f355d390d3f63f7e10b0",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/85ac05e11171d33f3aa2bcdeb7e2eecca5134f75bd21f355d390d3f63f7e10b0",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 11,
+        "estado": 1,
+        "transactionHash": "85ac05e11171d33f3aa2bcdeb7e2eecca5134f75bd21f355d390d3f63f7e10b0",
+        "blockNumber": 217627360,
+        "gasUsed": 112063,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627360,
+      "gas_used": 112063,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:47.063657",
+      "transaction_hash": "db5b61496b1cf3ca94dbfb7618bb6f802c56e23f75aae4554f1dbb3c0e7ec9e8",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/db5b61496b1cf3ca94dbfb7618bb6f802c56e23f75aae4554f1dbb3c0e7ec9e8",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 2,
+        "nuevaURI": "ipfs://QmTestURIEncontrado123456789"
+      },
+      "result": {
+        "estado": 2,
+        "transactionHash": "db5b61496b1cf3ca94dbfb7618bb6f802c56e23f75aae4554f1dbb3c0e7ec9e8",
+        "blockNumber": 217627352,
+        "gasUsed": 32690,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627352,
+      "gas_used": 32690,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:45.066965",
+      "transaction_hash": "9eecb25d61d3c426456c4daf8bf1aac70b02f2e8df84f965ed6cd4679a4aad24",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/9eecb25d61d3c426456c4daf8bf1aac70b02f2e8df84f965ed6cd4679a4aad24",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 1,
+        "nuevaURI": "ipfs://QmTestURICreado123456789"
+      },
+      "result": {
+        "estado": 1,
+        "transactionHash": "9eecb25d61d3c426456c4daf8bf1aac70b02f2e8df84f965ed6cd4679a4aad24",
+        "blockNumber": 217627344,
+        "gasUsed": 27526,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627344,
+      "gas_used": 27526,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:28:04.196096",
+      "transaction_hash": "b64a14f27268c1f8bc247761ddce1a0ba5d779b1729fbdb755748fa17a1349dc",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/b64a14f27268c1f8bc247761ddce1a0ba5d779b1729fbdb755748fa17a1349dc",
+      "function": "marcarComoPagado",
+      "parameters": {
+        "tokenId": 9
+      },
+      "result": {
+        "tokenId": 9,
+        "tokenIdEvidencia": 10,
+        "transactionHash": "b64a14f27268c1f8bc247761ddce1a0ba5d779b1729fbdb755748fa17a1349dc",
+        "blockNumber": 217627182,
+        "gasUsed": 166280,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627182,
+      "gas_used": 166280,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:58.239650",
+      "transaction_hash": "4650b8e00706db22a841ea42ba615c5a2e6ff318d1d0a9b986736f41335c0fe3",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/4650b8e00706db22a841ea42ba615c5a2e6ff318d1d0a9b986736f41335c0fe3",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 9,
+        "nuevoEstado": 4,
+        "calificacion": 5
+      },
+      "result": {
+        "estadoAnterior": 3,
+        "nuevoEstado": 4,
+        "transactionHash": "4650b8e00706db22a841ea42ba615c5a2e6ff318d1d0a9b986736f41335c0fe3",
+        "blockNumber": 217627158,
+        "gasUsed": 56076,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627158,
+      "gas_used": 56076,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:55.337119",
+      "transaction_hash": "cff95c172d3f8d88bf1a2637ea0fe7979789599c783c1324cf2880911bb189e0",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/cff95c172d3f8d88bf1a2637ea0fe7979789599c783c1324cf2880911bb189e0",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 9,
+        "nuevoEstado": 3,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 2,
+        "nuevoEstado": 3,
+        "transactionHash": "cff95c172d3f8d88bf1a2637ea0fe7979789599c783c1324cf2880911bb189e0",
+        "blockNumber": 217627148,
+        "gasUsed": 36070,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627148,
+      "gas_used": 36070,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:52.637302",
+      "transaction_hash": "df329f43e45880d0f6fc82619c38fa261577589122eb226f6c9c0289efad5523",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/df329f43e45880d0f6fc82619c38fa261577589122eb226f6c9c0289efad5523",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 9,
+        "nuevoEstado": 2,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 1,
+        "nuevoEstado": 2,
+        "transactionHash": "df329f43e45880d0f6fc82619c38fa261577589122eb226f6c9c0289efad5523",
+        "blockNumber": 217627136,
+        "gasUsed": 92008,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627136,
+      "gas_used": 92008,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:49.214768",
+      "transaction_hash": "b028c92cbe5d20b2196be725c57def4579c683efef0a0487538caca9d51ca018",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/b028c92cbe5d20b2196be725c57def4579c683efef0a0487538caca9d51ca018",
+      "function": "asignarAcompanante",
+      "parameters": {
+        "tokenId": 9,
+        "acompanante": "0x742D35cc6634c0532925A3B8d4b6a5f6c6d5b7C8"
+      },
+      "result": {
+        "tokenId": 9,
+        "transactionHash": "b028c92cbe5d20b2196be725c57def4579c683efef0a0487538caca9d51ca018",
+        "blockNumber": 217627125,
+        "gasUsed": 46487,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627125,
+      "gas_used": 46487,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:46.021923",
+      "transaction_hash": "11ae83d31000745092445dbf644595bb85e0d2b714a0e1282478a5d203462ce3",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/11ae83d31000745092445dbf644595bb85e0d2b714a0e1282478a5d203462ce3",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 9,
+        "estado": 1,
+        "transactionHash": "11ae83d31000745092445dbf644595bb85e0d2b714a0e1282478a5d203462ce3",
+        "blockNumber": 217627111,
+        "gasUsed": 112063,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627111,
+      "gas_used": 112063,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:43.578809",
+      "transaction_hash": "245eedc3a83cd2da5fed9a96e90cdc2a20197e0032dc622a967543512c7deba0",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/245eedc3a83cd2da5fed9a96e90cdc2a20197e0032dc622a967543512c7deba0",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 2,
+        "nuevaURI": "ipfs://QmTestURIEncontrado123456789"
+      },
+      "result": {
+        "estado": 2,
+        "transactionHash": "245eedc3a83cd2da5fed9a96e90cdc2a20197e0032dc622a967543512c7deba0",
+        "blockNumber": 217627103,
+        "gasUsed": 32690,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627103,
+      "gas_used": 32690,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:27:40.847206",
+      "transaction_hash": "60ec6364c53d3925f43aff29b5b99c6ade8b992908196ae75efab1e558137262",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/60ec6364c53d3925f43aff29b5b99c6ade8b992908196ae75efab1e558137262",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 1,
+        "nuevaURI": "ipfs://QmTestURICreado123456789"
+      },
+      "result": {
+        "estado": 1,
+        "transactionHash": "60ec6364c53d3925f43aff29b5b99c6ade8b992908196ae75efab1e558137262",
+        "blockNumber": 217627092,
+        "gasUsed": 27526,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217627092,
+      "gas_used": 27526,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:53.031919",
+      "transaction_hash": "5f03c26a107bd17b8f65f7a2fd413b17fa2f06eca3c7833a796ffb3e52755870",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/5f03c26a107bd17b8f65f7a2fd413b17fa2f06eca3c7833a796ffb3e52755870",
+      "function": "marcarComoPagado",
+      "parameters": {
+        "tokenId": 7
+      },
+      "result": {
+        "tokenId": 7,
+        "tokenIdEvidencia": 8,
+        "transactionHash": "5f03c26a107bd17b8f65f7a2fd413b17fa2f06eca3c7833a796ffb3e52755870",
+        "blockNumber": 217626904,
+        "gasUsed": 166280,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626904,
+      "gas_used": 166280,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:49.629289",
+      "transaction_hash": "3d456407d7e7a6ae2e17ca2bdf5bd181528287adf7f451c9ae7e56e7721fee43",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/3d456407d7e7a6ae2e17ca2bdf5bd181528287adf7f451c9ae7e56e7721fee43",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 7,
+        "nuevoEstado": 4,
+        "calificacion": 5
+      },
+      "result": {
+        "estadoAnterior": 3,
+        "nuevoEstado": 4,
+        "transactionHash": "3d456407d7e7a6ae2e17ca2bdf5bd181528287adf7f451c9ae7e56e7721fee43",
+        "blockNumber": 217626891,
+        "gasUsed": 56076,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626891,
+      "gas_used": 56076,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:47.285525",
+      "transaction_hash": "6cdbc044e93633e281c807c500c5e156525c4eaa26f10cafe87922d639b11b75",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/6cdbc044e93633e281c807c500c5e156525c4eaa26f10cafe87922d639b11b75",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 7,
+        "nuevoEstado": 3,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 2,
+        "nuevoEstado": 3,
+        "transactionHash": "6cdbc044e93633e281c807c500c5e156525c4eaa26f10cafe87922d639b11b75",
+        "blockNumber": 217626881,
+        "gasUsed": 36070,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626881,
+      "gas_used": 36070,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:44.732597",
+      "transaction_hash": "f0753e8b07dbc35ecba7684dc8e17f3595329a6c35815c259decf02a3ac5c637",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/f0753e8b07dbc35ecba7684dc8e17f3595329a6c35815c259decf02a3ac5c637",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 7,
+        "nuevoEstado": 2,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 1,
+        "nuevoEstado": 2,
+        "transactionHash": "f0753e8b07dbc35ecba7684dc8e17f3595329a6c35815c259decf02a3ac5c637",
+        "blockNumber": 217626870,
+        "gasUsed": 92008,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626870,
+      "gas_used": 92008,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:41.543578",
+      "transaction_hash": "50ac7ce3c6983c9206be7ddbfdd45d53d17f07611efb95791cf9eea7ff58d595",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/50ac7ce3c6983c9206be7ddbfdd45d53d17f07611efb95791cf9eea7ff58d595",
+      "function": "asignarAcompanante",
+      "parameters": {
+        "tokenId": 7,
+        "acompanante": "0x742D35cc6634c0532925A3B8d4b6a5f6c6d5b7C8"
+      },
+      "result": {
+        "tokenId": 7,
+        "transactionHash": "50ac7ce3c6983c9206be7ddbfdd45d53d17f07611efb95791cf9eea7ff58d595",
+        "blockNumber": 217626860,
+        "gasUsed": 46487,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626860,
+      "gas_used": 46487,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:38.068206",
+      "transaction_hash": "418882aecfbc8fa7611c139aad488f766ad2ff581a414ef6d97e76cf18e3f8ff",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/418882aecfbc8fa7611c139aad488f766ad2ff581a414ef6d97e76cf18e3f8ff",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 7,
+        "estado": 1,
+        "transactionHash": "418882aecfbc8fa7611c139aad488f766ad2ff581a414ef6d97e76cf18e3f8ff",
+        "blockNumber": 217626846,
+        "gasUsed": 112063,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626846,
+      "gas_used": 112063,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:35.828006",
+      "transaction_hash": "067cbc2ae6f43158bb7b6b3c0ead8e74f6bc37460a2bac7d96da2da4e65ab9d2",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/067cbc2ae6f43158bb7b6b3c0ead8e74f6bc37460a2bac7d96da2da4e65ab9d2",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 2,
+        "nuevaURI": "ipfs://QmTestURIEncontrado123456789"
+      },
+      "result": {
+        "estado": 2,
+        "transactionHash": "067cbc2ae6f43158bb7b6b3c0ead8e74f6bc37460a2bac7d96da2da4e65ab9d2",
+        "blockNumber": 217626838,
+        "gasUsed": 32690,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626838,
+      "gas_used": 32690,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:26:33.658650",
+      "transaction_hash": "c8a0dc6b515bce2a0edc0ea94addf1a8604731271ef801b86b8f513ea3c6e0f4",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/c8a0dc6b515bce2a0edc0ea94addf1a8604731271ef801b86b8f513ea3c6e0f4",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 1,
+        "nuevaURI": "ipfs://QmTestURICreado123456789"
+      },
+      "result": {
+        "estado": 1,
+        "transactionHash": "c8a0dc6b515bce2a0edc0ea94addf1a8604731271ef801b86b8f513ea3c6e0f4",
+        "blockNumber": 217626827,
+        "gasUsed": 27526,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626827,
+      "gas_used": 27526,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:32.979286",
+      "transaction_hash": "22617646f71a53fa4b28073a852d8bd300f6b5f6edf4061a157aec02752bed50",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/22617646f71a53fa4b28073a852d8bd300f6b5f6edf4061a157aec02752bed50",
+      "function": "marcarComoPagado",
+      "parameters": {
+        "tokenId": 5
+      },
+      "result": {
+        "tokenId": 5,
+        "tokenIdEvidencia": 6,
+        "transactionHash": "22617646f71a53fa4b28073a852d8bd300f6b5f6edf4061a157aec02752bed50",
+        "blockNumber": 217626603,
+        "gasUsed": 183380,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626603,
+      "gas_used": 183380,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:29.418314",
+      "transaction_hash": "5d0e305b9f2a12cd06449daec2efeac05023873e10c86ee8bfe05ad9f1a3a98c",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/5d0e305b9f2a12cd06449daec2efeac05023873e10c86ee8bfe05ad9f1a3a98c",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 5,
+        "nuevoEstado": 4,
+        "calificacion": 5
+      },
+      "result": {
+        "estadoAnterior": 3,
+        "nuevoEstado": 4,
+        "transactionHash": "5d0e305b9f2a12cd06449daec2efeac05023873e10c86ee8bfe05ad9f1a3a98c",
+        "blockNumber": 217626590,
+        "gasUsed": 56076,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626590,
+      "gas_used": 56076,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:26.793253",
+      "transaction_hash": "123380a7fffc3cbab64020ee8ae9138bd4420dccb9f684193f7ed7f7c3019a6b",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/123380a7fffc3cbab64020ee8ae9138bd4420dccb9f684193f7ed7f7c3019a6b",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 5,
+        "nuevoEstado": 3,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 2,
+        "nuevoEstado": 3,
+        "transactionHash": "123380a7fffc3cbab64020ee8ae9138bd4420dccb9f684193f7ed7f7c3019a6b",
+        "blockNumber": 217626580,
+        "gasUsed": 36070,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626580,
+      "gas_used": 36070,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:24.333933",
+      "transaction_hash": "2fc90171827ceda836acee3fa1d8993c9b548c7226d10164f457149565f5b5c0",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/2fc90171827ceda836acee3fa1d8993c9b548c7226d10164f457149565f5b5c0",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 5,
+        "nuevoEstado": 2,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 1,
+        "nuevoEstado": 2,
+        "transactionHash": "2fc90171827ceda836acee3fa1d8993c9b548c7226d10164f457149565f5b5c0",
+        "blockNumber": 217626571,
+        "gasUsed": 92008,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626571,
+      "gas_used": 92008,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:21.530245",
+      "transaction_hash": "8426cb9bbd050f0423879c7ddb1e882031f2062c25da5ff83889eb291237f7d6",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/8426cb9bbd050f0423879c7ddb1e882031f2062c25da5ff83889eb291237f7d6",
+      "function": "asignarAcompanante",
+      "parameters": {
+        "tokenId": 5,
+        "acompanante": "0x742D35cc6634c0532925A3B8d4b6a5f6c6d5b7C8"
+      },
+      "result": {
+        "tokenId": 5,
+        "transactionHash": "8426cb9bbd050f0423879c7ddb1e882031f2062c25da5ff83889eb291237f7d6",
+        "blockNumber": 217626563,
+        "gasUsed": 46487,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626563,
+      "gas_used": 46487,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:18.311545",
+      "transaction_hash": "3ba3b375fd4c32bf7370319a0c7fbc2dc6aa730429e22a3782dd1c0f423a51e1",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/3ba3b375fd4c32bf7370319a0c7fbc2dc6aa730429e22a3782dd1c0f423a51e1",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 5,
+        "estado": 1,
+        "transactionHash": "3ba3b375fd4c32bf7370319a0c7fbc2dc6aa730429e22a3782dd1c0f423a51e1",
+        "blockNumber": 217626550,
+        "gasUsed": 112063,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626550,
+      "gas_used": 112063,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:16.136613",
+      "transaction_hash": "494bf254f7dc64f380b309b88caded9c71916ac72b68a9e5aa79415966cf79ac",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/494bf254f7dc64f380b309b88caded9c71916ac72b68a9e5aa79415966cf79ac",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 2,
+        "nuevaURI": "ipfs://QmTestURIEncontrado123456789"
+      },
+      "result": {
+        "estado": 2,
+        "transactionHash": "494bf254f7dc64f380b309b88caded9c71916ac72b68a9e5aa79415966cf79ac",
+        "blockNumber": 217626541,
+        "gasUsed": 32690,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626541,
+      "gas_used": 32690,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:25:13.595183",
+      "transaction_hash": "872692c0238a6c6f3ba0eec5bc336a701d639dcbb424dc6acdaeed8e4d06d72f",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/872692c0238a6c6f3ba0eec5bc336a701d639dcbb424dc6acdaeed8e4d06d72f",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 1,
+        "nuevaURI": "ipfs://QmTestURICreado123456789"
+      },
+      "result": {
+        "estado": 1,
+        "transactionHash": "872692c0238a6c6f3ba0eec5bc336a701d639dcbb424dc6acdaeed8e4d06d72f",
+        "blockNumber": 217626533,
+        "gasUsed": 27526,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626533,
+      "gas_used": 27526,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:23:51.115411",
+      "transaction_hash": "f64556e07ebfd3a8e4991f5ae63b8012d6c8759c9d2b685b86e8c15e042a919c",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/f64556e07ebfd3a8e4991f5ae63b8012d6c8759c9d2b685b86e8c15e042a919c",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 4,
+        "nuevoEstado": 4,
+        "calificacion": 5
+      },
+      "result": {
+        "estadoAnterior": 3,
+        "nuevoEstado": 4,
+        "transactionHash": "f64556e07ebfd3a8e4991f5ae63b8012d6c8759c9d2b685b86e8c15e042a919c",
+        "blockNumber": 217626221,
+        "gasUsed": 56076,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626221,
+      "gas_used": 56076,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:23:48.494139",
+      "transaction_hash": "571f3ab37c7ad1a595e7077157d90fb14825fb322aa5798d4e83dae135987193",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/571f3ab37c7ad1a595e7077157d90fb14825fb322aa5798d4e83dae135987193",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 4,
+        "nuevoEstado": 3,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 2,
+        "nuevoEstado": 3,
+        "transactionHash": "571f3ab37c7ad1a595e7077157d90fb14825fb322aa5798d4e83dae135987193",
+        "blockNumber": 217626212,
+        "gasUsed": 36070,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626212,
+      "gas_used": 36070,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:23:46.421346",
+      "transaction_hash": "f598ffd383f5da473524575fddea629dc087d29b6af43b3d40ae4156c6955476",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/f598ffd383f5da473524575fddea629dc087d29b6af43b3d40ae4156c6955476",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 4,
+        "nuevoEstado": 2,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 1,
+        "nuevoEstado": 2,
+        "transactionHash": "f598ffd383f5da473524575fddea629dc087d29b6af43b3d40ae4156c6955476",
+        "blockNumber": 217626206,
+        "gasUsed": 92008,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626206,
+      "gas_used": 92008,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:23:42.455320",
+      "transaction_hash": "6195d8276c0982eb3db381172569f533ac3243b8a891c8a3db13132895300d67",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/6195d8276c0982eb3db381172569f533ac3243b8a891c8a3db13132895300d67",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 4,
+        "estado": 1,
+        "transactionHash": "6195d8276c0982eb3db381172569f533ac3243b8a891c8a3db13132895300d67",
+        "blockNumber": 217626189,
+        "gasUsed": 112063,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626189,
+      "gas_used": 112063,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:23:39.448460",
+      "transaction_hash": "cb0c5aa2e61269fa3ccae1177f99e820c28bcd990b492341a242a8c997016e68",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/cb0c5aa2e61269fa3ccae1177f99e820c28bcd990b492341a242a8c997016e68",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 2,
+        "nuevaURI": "ipfs://QmTestURIEncontrado123456789"
+      },
+      "result": {
+        "estado": 2,
+        "transactionHash": "cb0c5aa2e61269fa3ccae1177f99e820c28bcd990b492341a242a8c997016e68",
+        "blockNumber": 217626179,
+        "gasUsed": 92252,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626179,
+      "gas_used": 92252,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:23:37.015228",
+      "transaction_hash": "b64993e7177132a3e52823cbc978dff0ca3f3ea96dfcf996e8f9f15199b1be15",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/b64993e7177132a3e52823cbc978dff0ca3f3ea96dfcf996e8f9f15199b1be15",
+      "function": "configurarURIEstado",
+      "parameters": {
+        "estado": 1,
+        "nuevaURI": "ipfs://QmTestURICreado123456789"
+      },
+      "result": {
+        "estado": 1,
+        "transactionHash": "b64993e7177132a3e52823cbc978dff0ca3f3ea96dfcf996e8f9f15199b1be15",
+        "blockNumber": 217626170,
+        "gasUsed": 47426,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217626170,
+      "gas_used": 47426,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:03:31.904657",
+      "transaction_hash": "edf69ca139d865e0eb9d9c9e6c742bef02927fa4ff6ce33ed681832351951f17",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/edf69ca139d865e0eb9d9c9e6c742bef02927fa4ff6ce33ed681832351951f17",
+      "function": "cambiarEstadoServicio",
+      "parameters": {
+        "tokenId": 3,
+        "nuevoEstado": 2,
+        "calificacion": 0
+      },
+      "result": {
+        "estadoAnterior": 1,
+        "nuevoEstado": 2,
+        "transactionHash": "edf69ca139d865e0eb9d9c9e6c742bef02927fa4ff6ce33ed681832351951f17",
+        "blockNumber": 217621516,
+        "gasUsed": 36070,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217621516,
+      "gas_used": 36070,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-21T18:03:09.511162",
+      "transaction_hash": "f7ac30bbb621be2e131d1627a109597286980a32a747353980a7a0907f0ec59a",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/f7ac30bbb621be2e131d1627a109597286980a32a747353980a7a0907f0ec59a",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0xa92d504731aA3E99DF20ffd200ED03F9a55a6219"
+      },
+      "result": {
+        "tokenId": 3,
+        "estado": 1,
+        "transactionHash": "f7ac30bbb621be2e131d1627a109597286980a32a747353980a7a0907f0ec59a",
+        "blockNumber": 217621429,
+        "gasUsed": 87663,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217621429,
+      "gas_used": 87663,
+      "network": "arbitrumSepolia"
+    }
+  ]
+}
