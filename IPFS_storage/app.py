@@ -16,6 +16,7 @@ from PIL import Image
 # Add modules directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "modules"))
 
+from filecoin_client import FilecoinCloudClient
 from metadata_builder import (
     build_nft_metadata,
     create_metadata_history_entry,
@@ -35,6 +36,10 @@ def init_session_state():
         st.session_state.current_metadata = None
     if "pinata_client" not in st.session_state:
         st.session_state.pinata_client = None
+    if "filecoin_client" not in st.session_state:
+        st.session_state.filecoin_client = None
+    if "storage_provider" not in st.session_state:
+        st.session_state.storage_provider = "pinata"
 
 
 def load_pinata_client() -> Optional[PinataClient]:
@@ -51,6 +56,21 @@ def load_pinata_client() -> Optional[PinataClient]:
         st.error(
             "Please check your .env file contains PINATA_API_KEY and PINATA_SECRET_API_KEY"
         )
+        return None
+
+
+def load_filecoin_client() -> Optional[FilecoinCloudClient]:
+    """Load and test Filecoin Cloud client"""
+    try:
+        client = FilecoinCloudClient()
+        if client.test_authentication():
+            return client
+        else:
+            st.error("❌ Failed to authenticate with Filecoin Cloud")
+            return None
+    except Exception as e:
+        st.error(f"❌ Error initializing Filecoin client: {str(e)}")
+        st.error("Please check your .env file contains FILECOIN_PRIVATE_KEY")
         return None
 
 
@@ -146,28 +166,81 @@ def main():
     with st.sidebar:
         st.header("🔧 Configuration")
 
-        # Initialize Pinata client
-        if st.session_state.pinata_client is None:
-            with st.spinner("Testing Pinata connection..."):
-                st.session_state.pinata_client = load_pinata_client()
+        # Storage provider selection
+        st.subheader("📡 Storage Provider")
+        provider = st.radio(
+            "Choose storage provider:",
+            ["pinata", "filecoin"],
+            format_func=lambda x: "📌 Pinata IPFS"
+            if x == "pinata"
+            else "🟠 Filecoin Cloud",
+            key="storage_provider_radio",
+        )
 
-        if st.session_state.pinata_client:
-            st.success("✅ Connected to Pinata")
+        if provider != st.session_state.storage_provider:
+            st.session_state.storage_provider = provider
+            st.rerun()
 
-            # Account info
-            with st.expander("📊 Account Info"):
-                try:
-                    account_info = st.session_state.pinata_client.get_account_info()
-                    if "error" not in account_info:
-                        st.metric("Pin Count", account_info.get("pin_count", "N/A"))
-                        st.metric(
-                            "Pin Size", f"{account_info.get('pin_size_total', 0)} bytes"
+        # Initialize selected client
+        if st.session_state.storage_provider == "pinata":
+            if st.session_state.pinata_client is None:
+                with st.spinner("Testing Pinata connection..."):
+                    st.session_state.pinata_client = load_pinata_client()
+
+            if st.session_state.pinata_client:
+                st.success("✅ Connected to Pinata")
+
+                # Account info
+                with st.expander("📊 Account Info"):
+                    try:
+                        account_info = st.session_state.pinata_client.get_account_info()
+                        if "error" not in account_info:
+                            st.metric("Pin Count", account_info.get("pin_count", "N/A"))
+                            st.metric(
+                                "Pin Size",
+                                f"{account_info.get('pin_size_total', 0)} bytes",
+                            )
+                    except:
+                        st.info("Could not load account info")
+            else:
+                st.error("❌ Not connected to Pinata")
+                st.stop()
+
+        else:  # filecoin
+            if st.session_state.filecoin_client is None:
+                with st.spinner("Testing Filecoin Cloud connection..."):
+                    st.session_state.filecoin_client = load_filecoin_client()
+
+            if st.session_state.filecoin_client:
+                st.success("✅ Connected to Filecoin Cloud")
+
+                # Account info
+                with st.expander("📊 Account Info"):
+                    try:
+                        balance_info = st.session_state.filecoin_client.get_balance()
+                        if "error" not in balance_info:
+                            balances = balance_info.get("balances", {})
+                            st.metric(
+                                "USDFC Balance", f"{balances.get('USDFC', '0')} USDFC"
+                            )
+                            st.metric("FIL Balance", f"{balances.get('FIL', '0')} FIL")
+                    except:
+                        st.info("Could not load balance info")
+
+                    try:
+                        storage_info = (
+                            st.session_state.filecoin_client.get_storage_info()
                         )
-                except:
-                    st.info("Could not load account info")
-        else:
-            st.error("❌ Not connected to Pinata")
-            st.stop()
+                        if "error" not in storage_info:
+                            info = storage_info.get("info", {})
+                            st.metric(
+                                "Active Providers", info.get("activeProviders", "N/A")
+                            )
+                    except:
+                        pass
+            else:
+                st.error("❌ Not connected to Filecoin Cloud")
+                st.stop()
 
         st.divider()
 
@@ -599,15 +672,24 @@ def process_upload(
             st.error("❌ File is empty (0 bytes). Please select a valid image.")
             return
 
-        # Upload image to Pinata
-        image_cid = st.session_state.pinata_client.upload_file(
-            file_bytes=file_bytes,
-            filename=uploaded_file.name,
-            metadata={"name": f"{name}_image"},
-        )
+        # Upload image to selected provider
+        if st.session_state.storage_provider == "pinata":
+            image_cid = st.session_state.pinata_client.upload_file(
+                file_bytes=file_bytes,
+                filename=uploaded_file.name,
+                metadata={"name": f"{name}_image"},
+            )
+            client = st.session_state.pinata_client
+        else:  # filecoin
+            image_cid = st.session_state.filecoin_client.upload_file(
+                file_bytes=file_bytes,
+                filename=uploaded_file.name,
+                metadata={"name": f"{name}_image"},
+            )
+            client = st.session_state.filecoin_client
 
-        image_uri = st.session_state.pinata_client.get_ipfs_uri(image_cid)
-        image_gateway = st.session_state.pinata_client.get_gateway_url(image_cid)
+        image_uri = client.get_ipfs_uri(image_cid)
+        image_gateway = client.get_gateway_url(image_cid)
 
         progress_bar.progress(50)
         status_text.text("🔨 Generating metadata...")
@@ -627,12 +709,10 @@ def process_upload(
         status_text.text("📝 Uploading metadata to IPFS...")
 
         # Step 3: Upload metadata
-        metadata_cid = st.session_state.pinata_client.upload_json(
-            json_data=metadata, name=f"{name}_metadata"
-        )
+        metadata_cid = client.upload_json(json_data=metadata, name=f"{name}_metadata")
 
-        metadata_uri = st.session_state.pinata_client.get_ipfs_uri(metadata_cid)
-        metadata_gateway = st.session_state.pinata_client.get_gateway_url(metadata_cid)
+        metadata_uri = client.get_ipfs_uri(metadata_cid)
+        metadata_gateway = client.get_gateway_url(metadata_cid)
 
         progress_bar.progress(100)
         status_text.text("✅ Upload completed!")

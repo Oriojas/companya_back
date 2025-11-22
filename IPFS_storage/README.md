@@ -1,10 +1,11 @@
 # NFT IPFS Metadata Uploader
 
-Una aplicación web construida con Streamlit para subir imágenes a IPFS y generar metadata compatible con OpenSea para NFTs.
+Una aplicación web construida con Streamlit para subir imágenes a IPFS y generar metadata compatible con OpenSea para NFTs. **Soporta múltiples proveedores de almacenamiento descentralizado.**
 
 ## 🎯 Características
 
-- **Upload de imágenes**: Sube imágenes directamente a IPFS usando Pinata
+- **Múltiples proveedores**: Pinata IPFS y Filecoin Cloud
+- **Upload de imágenes**: Sube imágenes directamente a IPFS
 - **Generación de metadata**: Crea metadata JSON compatible con estándares de OpenSea
 - **Interfaz amigable**: Aplicación web intuitiva con Streamlit
 - **Atributos personalizados**: Formulario específico para atributos de NFT
@@ -19,12 +20,18 @@ IPFS_storage/
 ├── modules/
 │   ├── __init__.py
 │   ├── pinata_client.py      # Cliente para API de Pinata
+│   ├── filecoin_client.py    # Cliente para Filecoin Cloud
 │   └── metadata_builder.py   # Generador de metadata OpenSea
+├── bridge/                   # Servicio Node.js para Filecoin Cloud
+│   ├── server.js            # Servidor bridge con Synapse SDK
+│   ├── package.json         # Dependencias Node.js
+│   └── setup.sh            # Script de configuración
 ├── uploads/
 │   ├── temp_images/          # Imágenes temporales
 │   ├── metadata_history/     # Historial y JSONs generados
 │   └── logs/                 # Logs de uploads en formato JSON
 ├── app.py                    # Aplicación Streamlit principal
+├── setup_filecoin.py         # Configuración de Filecoin Cloud
 ├── requirements.txt          # Dependencias Python
 ├── .env                      # Variables de entorno (no incluido)
 ├── .env.example             # Template de configuración
@@ -61,30 +68,40 @@ pip install -r requirements.txt
 
 ### 4. Configurar variables de entorno
 
-Copia el archivo `.env.example` a `.env` y configura tus credenciales de Pinata:
+Copia el archivo `.env.example` a `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Edita el archivo `.env`:
+### 5. Configurar proveedor de almacenamiento
 
+Edita el archivo `.env` según el proveedor que prefieras:
+
+#### **Opción A: Pinata IPFS (Tradicional)**
 ```bash
+STORAGE_PROVIDER=pinata
 PINATA_API_KEY=tu_api_key_aqui
 PINATA_SECRET_API_KEY=tu_secret_api_key_aqui
 ```
 
-### 5. Obtener credenciales de Pinata
-
+**Obtener credenciales de Pinata:**
 1. Ve a [Pinata Cloud](https://app.pinata.cloud)
-2. Crea una cuenta gratuita (1GB gratis)
-3. Navega a **Developers > API Keys**
-4. Crea un nuevo API key con permisos de:
-   - `pinFileToIPFS`
-   - `pinJSONToIPFS`
-   - `pinList`
-   - `userPinnedDataTotal`
-5. Copia el API Key y Secret API Key al archivo `.env`
+2. Crea cuenta gratuita (1GB gratis)
+3. Crea API key con permisos completos
+4. Copia las credenciales al `.env`
+
+#### **Opción B: Filecoin Cloud (Recomendado)**
+```bash
+STORAGE_PROVIDER=filecoin
+FILECOIN_PRIVATE_KEY=tu_private_key_sin_0x
+FILECOIN_RPC_URL=https://filecoin-calibration.chainup.net/rpc/v1
+```
+
+**Configurar Filecoin Cloud:**
+1. Obtén tokens de prueba: [Faucet Calibration](https://faucet.calibration.fildev.network/)
+2. Configura tu private key de wallet
+3. Ejecuta: `python setup_filecoin.py`
 
 ## 🖥️ Uso
 
@@ -94,6 +111,9 @@ PINATA_SECRET_API_KEY=tu_secret_api_key_aqui
 # Asegúrate de que el entorno virtual esté activado
 source venv/bin/activate
 
+# Para Filecoin Cloud (configuración inicial)
+python setup_filecoin.py
+
 # Ejecutar la aplicación
 streamlit run app.py
 ```
@@ -102,17 +122,18 @@ La aplicación se abrirá en tu navegador en `http://localhost:8501`
 
 ### Flujo de trabajo
 
-1. **Subir imagen**: Arrastra o selecciona una imagen (PNG, JPG, GIF, SVG, WEBP)
-2. **Completar metadata**: Llena el formulario con:
+1. **Seleccionar proveedor**: Elige entre Pinata IPFS o Filecoin Cloud
+2. **Subir imagen**: Arrastra o selecciona una imagen (PNG, JPG, GIF, SVG, WEBP)
+3. **Completar metadata**: Llena el formulario con:
    - **Name**: Nombre del NFT
    - **Description**: Descripción detallada
    - **Actividad**: Tipo de actividad
    - **Usuario**: Usuario asociado
    - **Acompañante**: Compañero o equipo
    - **Tiempo**: Valor numérico de tiempo
-3. **Upload a IPFS**: Haz clic en "🚀 Upload to IPFS"
-4. **Obtener URIs**: Copia la URI final para usar en tu smart contract
-5. **Ver logs**: Revisa el tab "📊 Upload Logs" para ver estadísticas detalladas
+4. **Upload a IPFS**: Haz clic en "🚀 Upload to IPFS"
+5. **Obtener URIs**: Copia la URI final para usar en tu smart contract
+6. **Ver logs**: Revisa el tab "📊 Upload Logs" para ver estadísticas detalladas
 
 ## 📝 Formato de Metadata
 
@@ -166,6 +187,27 @@ metadata_cid = client.upload_json(json_data, name)
 
 # Generar URI
 uri = client.get_ipfs_uri(cid)  # ipfs://cid
+```
+
+### FilecoinCloudClient
+
+```python
+from modules.filecoin_client import FilecoinCloudClient
+
+client = FilecoinCloudClient()
+
+# Subir archivo
+image_cid = client.upload_file(file_bytes, filename)
+
+# Subir JSON
+metadata_cid = client.upload_json(json_data, name)
+
+# Generar URI
+uri = client.get_ipfs_uri(cid)  # ipfs://cid
+
+# Funciones adicionales
+balance = client.get_balance()  # Obtener balance USDFC/FIL
+cost = client.estimate_cost(file_size, days)  # Estimar costo
 ```
 
 ### MetadataBuilder
@@ -295,7 +337,7 @@ Para acceder a tu contenido via HTTP:
 - **IPFS.io Gateway**: `https://ipfs.io/ipfs/[CID]`
 - **Cloudflare Gateway**: `https://cloudflare-ipfs.com/ipfs/[CID]`
 
-## 📈 Límites y Consideraciones
+### Límites y Consideraciones
 
 ### Pinata (Plan Gratuito)
 - **Almacenamiento**: 1GB
@@ -303,9 +345,16 @@ Para acceder a tu contenido via HTTP:
 - **Archivos**: Sin límite en cantidad
 - **Tamaño máximo por archivo**: 100MB
 
+### Filecoin Cloud (Plan Gratuito)
+- **Almacenamiento**: Hasta 1TB gratis
+- **Permanencia**: Almacenamiento permanente (no suscripción)
+- **Tamaño mínimo**: 127 bytes por archivo
+- **CDN**: Acceso rápido mundial incluido
+
 ### Recomendaciones
+- **Filecoin Cloud**: Para proyectos grandes y almacenamiento permanente
+- **Pinata**: Para prototipado rápido y proyectos pequeños
 - Optimiza imágenes antes de subir
-- Usa formatos eficientes (WebP, PNG optimizado)
 - Mantén respaldo local de CIDs importantes
 - Considera el costo de gas al usar URIs en mainnet
 
@@ -334,6 +383,9 @@ Para contribuir al proyecto:
 
 ### Scripts de Diagnóstico
 ```bash
+# Configurar Filecoin Cloud
+python setup_filecoin.py
+
 # Probar conexión a Pinata
 python test_connection.py
 
@@ -351,6 +403,7 @@ python example_usage.py
 - **uploads/logs/upload_log.json**: Log principal con todos los uploads
 - **uploads/metadata_history/**: JSONs individuales de cada NFT
 - **uploads/logs/export_*.json**: Exportaciones de logs
+- **bridge/**: Servicio Node.js para Filecoin Cloud (solo si usas Filecoin)
 
 ## 📄 Licencia
 

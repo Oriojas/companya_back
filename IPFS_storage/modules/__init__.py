@@ -4,8 +4,9 @@
 __version__ = "1.0.0"
 __author__ = "IPFS Storage Team"
 
+from .filecoin_client import FilecoinCloudClient
 from .metadata_builder import build_nft_metadata
 from .pinata_client import PinataClient
 from .upload_logger import UploadLogger
 
-__all__ = ["PinataClient", "build_nft_metadata", "UploadLogger"]
+__all__ = ["PinataClient", "FilecoinCloudClient", "build_nft_metadata", "UploadLogger"]

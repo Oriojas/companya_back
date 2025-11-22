@@ -5,10 +5,52 @@
     "network": "Arbitrum Sepolia",
     "contract_address": "0xFF2E077849546cCB392f9e38B716A40fDC451798",
     "version": "1.0.0",
-    "last_updated": "2025-11-21T20:40:11.863674",
-    "total_transactions": 43
+    "last_updated": "2025-11-22T09:58:59.029974",
+    "total_transactions": 45
   },
   "transactions": [
+    {
+      "timestamp": "2025-11-22T09:58:59.028042",
+      "transaction_hash": "e3e713cf932bce07be3415d4356ec91a7a8d7b78be9aef6e1711000fe88bd2eb",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/e3e713cf932bce07be3415d4356ec91a7a8d7b78be9aef6e1711000fe88bd2eb",
+      "function": "asignarAcompanante",
+      "parameters": {
+        "tokenId": 0,
+        "acompanante": "0x1B6b1b7A6460679CAD7A70C1E3764eb9da94031C"
+      },
+      "result": {
+        "tokenId": 0,
+        "transactionHash": "e3e713cf932bce07be3415d4356ec91a7a8d7b78be9aef6e1711000fe88bd2eb",
+        "blockNumber": 217844885,
+        "gasUsed": 46481,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217844885,
+      "gas_used": 46481,
+      "network": "arbitrumSepolia"
+    },
+    {
+      "timestamp": "2025-11-22T09:54:05.195303",
+      "transaction_hash": "78cb913b33b9df3678951463e5518c8349229224202970dfa251f9372e5aa835",
+      "arbiscan_url": "https://sepolia.arbiscan.io/tx/78cb913b33b9df3678951463e5518c8349229224202970dfa251f9372e5aa835",
+      "function": "crearServicio",
+      "parameters": {
+        "destinatario": "0x1B6b1b7A6460679CAD7A70C1E3764eb9da94031C"
+      },
+      "result": {
+        "tokenId": 1,
+        "estado": 1,
+        "transactionHash": "78cb913b33b9df3678951463e5518c8349229224202970dfa251f9372e5aa835",
+        "blockNumber": 217843718,
+        "gasUsed": 132111,
+        "status": 1
+      },
+      "status": "success",
+      "block_number": 217843718,
+      "gas_used": 132111,
+      "network": "arbitrumSepolia"
+    },
     {
       "timestamp": "2025-11-21T20:40:11.861737",
       "transaction_hash": "73d17a9c093a1f128d85b82b218e6c240226aa3270fcd0df44c6c57b11858221",
