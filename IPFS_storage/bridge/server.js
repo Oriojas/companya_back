@@ -1,12 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import multer from 'multer';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { readFileSync } from 'fs';
-import { Synapse, RPC_URLS, TOKENS, TIME_CONSTANTS } from '@filoz/synapse-sdk';
-import { ethers } from 'ethers';
+import express from "express";
+import cors from "cors";
+import multer from "multer";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import { readFileSync } from "fs";
+import { Synapse, RPC_URLS, TOKENS, TIME_CONSTANTS } from "@filoz/synapse-sdk";
+import { ethers } from "ethers";
 
 // Load environment variables
 dotenv.config();
@@ -15,12 +15,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3001;
+let port = parseInt(process.env.PORT) || 3001;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 // Configure multer for file uploads
 const upload = multer({
@@ -41,16 +41,18 @@ async function initializeSynapse() {
     const rpcURL = process.env.FILECOIN_RPC_URL || RPC_URLS.calibration.http;
 
     if (!privateKey) {
-      throw new Error('FILECOIN_PRIVATE_KEY not found in environment variables');
+      throw new Error(
+        "FILECOIN_PRIVATE_KEY not found in environment variables"
+      );
     }
 
-    console.log('🔧 Initializing Synapse SDK...');
+    console.log("🔧 Initializing Synapse SDK...");
     synapse = await Synapse.create({
       privateKey: privateKey,
       rpcURL: rpcURL,
     });
 
-    console.log('✅ Synapse SDK initialized successfully');
+    console.log("✅ Synapse SDK initialized successfully");
 
     // Test connection and get initial balance
     try {
@@ -60,16 +62,18 @@ async function initializeSynapse() {
 
       // Check if we have sufficient balance for operations
       if (walletBalance < ethers.parseUnits("0.1", 18)) {
-        console.warn('⚠️  Low USDFC balance. Consider adding more funds for storage operations.');
+        console.warn(
+          "⚠️  Low USDFC balance. Consider adding more funds for storage operations."
+        );
       }
     } catch (balanceError) {
-      console.warn('⚠️  Could not check wallet balance:', balanceError.message);
+      console.warn("⚠️  Could not check wallet balance:", balanceError.message);
     }
 
     isInitialized = true;
     return true;
   } catch (error) {
-    console.error('❌ Failed to initialize Synapse SDK:', error.message);
+    console.error("❌ Failed to initialize Synapse SDK:", error.message);
     isInitialized = false;
     return false;
   }
@@ -82,7 +86,7 @@ async function ensureInitialized(req, res, next) {
     if (!initialized) {
       return res.status(500).json({
         success: false,
-        error: 'Failed to initialize Filecoin connection'
+        error: "Failed to initialize Filecoin connection",
       });
     }
   }
@@ -90,119 +94,133 @@ async function ensureInitialized(req, res, next) {
 }
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
     success: true,
-    service: 'Filecoin Bridge Service',
-    status: isInitialized ? 'ready' : 'initializing',
-    timestamp: new Date().toISOString()
+    service: "Filecoin Bridge Service",
+    status: isInitialized ? "ready" : "initializing",
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Test authentication endpoint
-app.post('/test', ensureInitialized, async (req, res) => {
+app.post("/test", ensureInitialized, async (req, res) => {
   try {
     // Test basic SDK functionality
     const storageInfo = await synapse.storage.getStorageInfo();
 
     res.json({
       success: true,
-      message: 'Filecoin connection successful',
+      message: "Filecoin connection successful",
       providers: storageInfo.providers.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('❌ Test failed:', error);
+    console.error("❌ Test failed:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Upload file endpoint
-app.post('/upload/file', upload.single('file'), ensureInitialized, async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
+app.post(
+  "/upload/file",
+  upload.single("file"),
+  ensureInitialized,
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: "No file provided",
+        });
+      }
+
+      const { filename, metadata } = req.body;
+      const fileBuffer = req.file.buffer;
+
+      console.log(
+        `📤 Uploading file: ${filename || req.file.originalname} (${
+          fileBuffer.length
+        } bytes)`
+      );
+
+      // Ensure minimum size requirement (127 bytes)
+      let uploadBuffer = fileBuffer;
+      if (fileBuffer.length < 127) {
+        const padding = Buffer.alloc(127 - fileBuffer.length);
+        uploadBuffer = Buffer.concat([fileBuffer, padding]);
+        console.log(
+          `📏 Padded file to meet 127 byte minimum: ${uploadBuffer.length} bytes`
+        );
+      }
+
+      // Upload to Filecoin
+      const result = await synapse.storage.upload(uploadBuffer, {
+        withCDN: true, // Enable CDN for faster retrieval
+        metadata: metadata ? JSON.parse(metadata) : {},
+      });
+
+      console.log(
+        `✅ File uploaded successfully. Piece CID: ${result.pieceCid}`
+      );
+
+      res.json({
+        success: true,
+        pieceCid: result.pieceCid,
+        size: result.size,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("❌ File upload failed:", error);
+      res.status(500).json({
         success: false,
-        error: 'No file provided'
+        error: error.message,
       });
     }
-
-    const { filename, metadata } = req.body;
-    const fileBuffer = req.file.buffer;
-
-    console.log(`📤 Uploading file: ${filename || req.file.originalname} (${fileBuffer.length} bytes)`);
-
-    // Ensure minimum size requirement (127 bytes)
-    let uploadBuffer = fileBuffer;
-    if (fileBuffer.length < 127) {
-      const padding = Buffer.alloc(127 - fileBuffer.length);
-      uploadBuffer = Buffer.concat([fileBuffer, padding]);
-      console.log(`📏 Padded file to meet 127 byte minimum: ${uploadBuffer.length} bytes`);
-    }
-
-    // Upload to Filecoin
-    const result = await synapse.storage.upload(uploadBuffer, {
-      withCDN: true, // Enable CDN for faster retrieval
-      metadata: metadata ? JSON.parse(metadata) : {}
-    });
-
-    console.log(`✅ File uploaded successfully. Piece CID: ${result.pieceCid}`);
-
-    res.json({
-      success: true,
-      pieceCid: result.pieceCid,
-      size: result.size,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('❌ File upload failed:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 // Upload JSON endpoint
-app.post('/upload/json', ensureInitialized, async (req, res) => {
+app.post("/upload/json", ensureInitialized, async (req, res) => {
   try {
     const { data, name } = req.body;
 
     if (!data) {
       return res.status(400).json({
         success: false,
-        error: 'No JSON data provided'
+        error: "No JSON data provided",
       });
     }
 
-    console.log(`📝 Uploading JSON: ${name || 'unnamed'}`);
+    console.log(`📝 Uploading JSON: ${name || "unnamed"}`);
 
     // Convert JSON to buffer
     const jsonString = JSON.stringify(data, null, 2);
-    let jsonBuffer = Buffer.from(jsonString, 'utf8');
+    let jsonBuffer = Buffer.from(jsonString, "utf8");
 
     // Ensure minimum size requirement
     if (jsonBuffer.length < 127) {
       // Add padding to the JSON data
       const paddingSize = 127 - jsonBuffer.length;
-      data._padding = 'x'.repeat(paddingSize);
+      data._padding = "x".repeat(paddingSize);
       const paddedJsonString = JSON.stringify(data, null, 2);
-      jsonBuffer = Buffer.from(paddedJsonString, 'utf8');
-      console.log(`📏 Padded JSON to meet 127 byte minimum: ${jsonBuffer.length} bytes`);
+      jsonBuffer = Buffer.from(paddedJsonString, "utf8");
+      console.log(
+        `📏 Padded JSON to meet 127 byte minimum: ${jsonBuffer.length} bytes`
+      );
     }
 
     // Upload to Filecoin
     const result = await synapse.storage.upload(jsonBuffer, {
       withCDN: true,
       metadata: {
-        type: 'json',
-        name: name || 'metadata',
-        contentType: 'application/json'
-      }
+        type: "json",
+        name: name || "metadata",
+        contentType: "application/json",
+      },
     });
 
     console.log(`✅ JSON uploaded successfully. Piece CID: ${result.pieceCid}`);
@@ -211,27 +229,26 @@ app.post('/upload/json', ensureInitialized, async (req, res) => {
       success: true,
       pieceCid: result.pieceCid,
       size: result.size,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('❌ JSON upload failed:', error);
+    console.error("❌ JSON upload failed:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Download file endpoint
-app.post('/download', ensureInitialized, async (req, res) => {
+app.post("/download", ensureInitialized, async (req, res) => {
   try {
     const { pieceCid } = req.body;
 
     if (!pieceCid) {
       return res.status(400).json({
         success: false,
-        error: 'No piece CID provided'
+        error: "No piece CID provided",
       });
     }
 
@@ -241,7 +258,7 @@ app.post('/download', ensureInitialized, async (req, res) => {
     const data = await synapse.storage.download(pieceCid);
 
     // Convert to base64 for JSON response
-    const base64Content = Buffer.from(data).toString('base64');
+    const base64Content = Buffer.from(data).toString("base64");
 
     console.log(`✅ File downloaded successfully: ${data.length} bytes`);
 
@@ -249,49 +266,47 @@ app.post('/download', ensureInitialized, async (req, res) => {
       success: true,
       content: base64Content,
       size: data.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('❌ Download failed:', error);
+    console.error("❌ Download failed:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Get storage info endpoint
-app.get('/info', ensureInitialized, async (req, res) => {
+app.get("/info", ensureInitialized, async (req, res) => {
   try {
     const storageInfo = await synapse.storage.getStorageInfo();
 
     res.json({
       success: true,
       info: {
-        providers: storageInfo.providers.map(p => ({
+        providers: storageInfo.providers.map((p) => ({
           id: p.id,
           name: p.name,
           description: p.description,
-          active: p.active
+          active: p.active,
         })),
         totalProviders: storageInfo.providers.length,
-        activeProviders: storageInfo.providers.filter(p => p.active).length
+        activeProviders: storageInfo.providers.filter((p) => p.active).length,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('❌ Failed to get storage info:', error);
+    console.error("❌ Failed to get storage info:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Get balance endpoint
-app.get('/balance', ensureInitialized, async (req, res) => {
+app.get("/balance", ensureInitialized, async (req, res) => {
   try {
     const usdfc_balance = await synapse.payments.walletBalance(TOKENS.USDFC);
     const fil_balance = await synapse.payments.walletBalance(TOKENS.FIL);
@@ -300,34 +315,33 @@ app.get('/balance', ensureInitialized, async (req, res) => {
       success: true,
       balances: {
         USDFC: ethers.formatUnits(usdfc_balance, 18),
-        FIL: ethers.formatUnits(fil_balance, 18)
+        FIL: ethers.formatUnits(fil_balance, 18),
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('❌ Failed to get balance:', error);
+    console.error("❌ Failed to get balance:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Estimate cost endpoint
-app.post('/estimate', ensureInitialized, async (req, res) => {
+app.post("/estimate", ensureInitialized, async (req, res) => {
   try {
     const { fileSizeBytes, durationDays = 30 } = req.body;
 
     if (!fileSizeBytes || fileSizeBytes <= 0) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid file size'
+        error: "Invalid file size",
       });
     }
 
     // Simple cost estimation based on Filecoin storage pricing
-    const bytesToTiB = fileSizeBytes / (1024 ** 4);
+    const bytesToTiB = fileSizeBytes / 1024 ** 4;
     const costPerTiBMonth = 2.5; // Approximate USDFC cost for 1TiB for 30 days
     const monthsNeeded = durationDays / 30;
 
@@ -342,23 +356,22 @@ app.post('/estimate', ensureInitialized, async (req, res) => {
         breakdown: {
           sizeInTiB: bytesToTiB.toExponential(2),
           costPerTiBMonth: costPerTiBMonth,
-          monthsNeeded: monthsNeeded
-        }
+          monthsNeeded: monthsNeeded,
+        },
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('❌ Failed to estimate cost:', error);
+    console.error("❌ Failed to estimate cost:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Fund account endpoint (for initial setup)
-app.post('/fund', ensureInitialized, async (req, res) => {
+app.post("/fund", ensureInitialized, async (req, res) => {
   try {
     const { amount = "2.5" } = req.body; // Default 2.5 USDFC
 
@@ -372,7 +385,10 @@ app.post('/fund', ensureInitialized, async (req, res) => {
     if (currentBalance < depositAmount) {
       return res.status(400).json({
         success: false,
-        error: `Insufficient wallet balance. Need ${amount} USDFC, have ${ethers.formatUnits(currentBalance, 18)}`
+        error: `Insufficient wallet balance. Need ${amount} USDFC, have ${ethers.formatUnits(
+          currentBalance,
+          18
+        )}`,
       });
     }
 
@@ -393,34 +409,50 @@ app.post('/fund', ensureInitialized, async (req, res) => {
       success: true,
       message: `Successfully funded account with ${amount} USDFC`,
       transactionHash: tx.hash,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('❌ Failed to fund account:', error);
+    console.error("❌ Failed to fund account:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('❌ Server error:', error);
+  console.error("❌ Server error:", error);
   res.status(500).json({
     success: false,
-    error: 'Internal server error'
+    error: "Internal server error",
   });
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
-    error: 'Endpoint not found'
+    error: "Endpoint not found",
   });
 });
+
+// Function to find an available port
+async function findAvailablePort(startPort) {
+  return new Promise((resolve) => {
+    const server = app
+      .listen(startPort, () => {
+        const actualPort = server.address().port;
+        server.close(() => {
+          resolve(actualPort);
+        });
+      })
+      .on("error", () => {
+        // Port is busy, try the next one
+        resolve(findAvailablePort(startPort + 1));
+      });
+  });
+}
 
 // Start server
 async function startServer() {
@@ -429,7 +461,19 @@ async function startServer() {
     const initialized = await initializeSynapse();
 
     if (!initialized) {
-      console.warn('⚠️  Starting server without Synapse initialization. Check your configuration.');
+      console.warn(
+        "⚠️  Starting server without Synapse initialization. Check your configuration."
+      );
+    }
+
+    // Find an available port starting from the preferred port
+    const availablePort = await findAvailablePort(port);
+
+    if (availablePort !== port) {
+      console.log(
+        `⚠️  Port ${port} was busy, using port ${availablePort} instead`
+      );
+      port = availablePort;
     }
 
     app.listen(port, () => {
@@ -446,19 +490,19 @@ async function startServer() {
       console.log(`   POST /fund - Fund account`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 }
 
 // Handle process termination
-process.on('SIGINT', () => {
-  console.log('\n👋 Shutting down Filecoin Bridge Service...');
+process.on("SIGINT", () => {
+  console.log("\n👋 Shutting down Filecoin Bridge Service...");
   process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-  console.log('\n👋 Shutting down Filecoin Bridge Service...');
+process.on("SIGTERM", () => {
+  console.log("\n👋 Shutting down Filecoin Bridge Service...");
   process.exit(0);
 });
 

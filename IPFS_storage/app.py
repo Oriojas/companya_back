@@ -17,6 +17,7 @@ from PIL import Image
 sys.path.append(os.path.join(os.path.dirname(__file__), "modules"))
 
 from filecoin_client import FilecoinCloudClient
+from filecoin_direct_client import FilecoinDirectClient
 from metadata_builder import (
     build_nft_metadata,
     create_metadata_history_entry,
@@ -38,8 +39,10 @@ def init_session_state():
         st.session_state.pinata_client = None
     if "filecoin_client" not in st.session_state:
         st.session_state.filecoin_client = None
+    if "filecoin_direct_client" not in st.session_state:
+        st.session_state.filecoin_direct_client = None
     if "storage_provider" not in st.session_state:
-        st.session_state.storage_provider = "pinata"
+        st.session_state.storage_provider = "filecoin_direct"
 
 
 def load_pinata_client() -> Optional[PinataClient]:
@@ -70,6 +73,22 @@ def load_filecoin_client() -> Optional[FilecoinCloudClient]:
             return None
     except Exception as e:
         st.error(f"❌ Error initializing Filecoin client: {str(e)}")
+        st.error("Please check your .env file contains FILECOIN_PRIVATE_KEY")
+        return None
+
+
+def load_filecoin_direct_client() -> Optional[FilecoinDirectClient]:
+    """Load and test Filecoin Direct client"""
+    try:
+        client = FilecoinDirectClient()
+        if client.test_authentication():
+            return client
+        else:
+            st.error("❌ Failed to connect to Filecoin network")
+            st.error("Please check your FILECOIN_PRIVATE_KEY and network connection")
+            return None
+    except Exception as e:
+        st.error(f"❌ Error initializing Filecoin Direct client: {str(e)}")
         st.error("Please check your .env file contains FILECOIN_PRIVATE_KEY")
         return None
 
@@ -170,10 +189,12 @@ def main():
         st.subheader("📡 Storage Provider")
         provider = st.radio(
             "Choose storage provider:",
-            ["pinata", "filecoin"],
-            format_func=lambda x: "📌 Pinata IPFS"
+            ["filecoin_direct", "pinata", "filecoin"],
+            format_func=lambda x: "🔷 Filecoin Direct"
+            if x == "filecoin_direct"
+            else "📌 Pinata IPFS"
             if x == "pinata"
-            else "🟠 Filecoin Cloud",
+            else "🟠 Filecoin Cloud (Legacy)",
             key="storage_provider_radio",
         )
 
@@ -182,7 +203,48 @@ def main():
             st.rerun()
 
         # Initialize selected client
-        if st.session_state.storage_provider == "pinata":
+        if st.session_state.storage_provider == "filecoin_direct":
+            if st.session_state.filecoin_direct_client is None:
+                with st.spinner("Testing Filecoin Direct connection..."):
+                    st.session_state.filecoin_direct_client = (
+                        load_filecoin_direct_client()
+                    )
+
+            if st.session_state.filecoin_direct_client:
+                st.success("✅ Connected to Filecoin Direct")
+
+                # Account info
+                with st.expander("📊 Account Info"):
+                    try:
+                        balance_info = (
+                            st.session_state.filecoin_direct_client.get_balance()
+                        )
+                        if balance_info.get("success"):
+                            balances = balance_info.get("balances", {})
+                            st.metric("FIL Balance", f"{balances.get('FIL', '0')} FIL")
+
+                        storage_info = (
+                            st.session_state.filecoin_direct_client.get_storage_info()
+                        )
+                        if storage_info.get("success"):
+                            info = storage_info.get("info", {})
+                            st.metric("Network", info.get("network", "calibration"))
+                            st.metric(
+                                "Storage Providers", info.get("totalProviders", "N/A")
+                            )
+                    except Exception as e:
+                        st.warning(f"Could not load account info: {e}")
+
+                    st.markdown("**Features:**")
+                    st.markdown("• ✅ Direct Filecoin network access")
+                    st.markdown("• ✅ IPFS integration")
+                    st.markdown("• ✅ Storage deals")
+                    st.markdown("• ✅ Decentralized storage")
+            else:
+                st.error("❌ Could not connect to Filecoin Direct")
+                st.stop()
+
+        elif st.session_state.storage_provider == "pinata":
             if st.session_state.pinata_client is None:
                 with st.spinner("Testing Pinata connection..."):
                     st.session_state.pinata_client = load_pinata_client()
@@ -240,6 +302,7 @@ def main():
                         pass
             else:
                 st.error("❌ Not connected to Filecoin Cloud")
+                st.info("💡 Recommended: Use Filecoin Direct instead")
                 st.stop()
 
         st.divider()
@@ -680,7 +743,14 @@ def process_upload(
                 metadata={"name": f"{name}_image"},
             )
             client = st.session_state.pinata_client
-        else:  # filecoin
+        elif st.session_state.storage_provider == "filecoin_direct":
+            image_cid = st.session_state.filecoin_direct_client.upload_file(
+                file_bytes=file_bytes,
+                filename=uploaded_file.name,
+                metadata={"name": f"{name}_image"},
+            )
+            client = st.session_state.filecoin_direct_client
+        else:  # filecoin (legacy)
             image_cid = st.session_state.filecoin_client.upload_file(
                 file_bytes=file_bytes,
                 filename=uploaded_file.name,

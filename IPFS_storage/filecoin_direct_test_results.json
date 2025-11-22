@@ -1,0 +1,117 @@
+{
+  "timestamp": "2025-11-22T16:30:34.586487",
+  "tests": [
+    {
+      "test": "client_initialization",
+      "success": true,
+      "error": null,
+      "duration": 5.364418029785156e-05,
+      "wallet_address": "0xa92d504731aa3e99df20ffd200ed03f9a55a6219",
+      "network": "https://api.calibration.node.glif.io/rpc/v1"
+    },
+    {
+      "test": "network_connection",
+      "success": true,
+      "error": null,
+      "duration": 1.6549060344696045
+    },
+    {
+      "test": "wallet_balance",
+      "success": false,
+      "error": "Failed to get balance",
+      "duration": 2.4983227252960205,
+      "balance": null
+    },
+    {
+      "test": "storage_info",
+      "success": true,
+      "error": null,
+      "duration": 2.7125136852264404,
+      "providers": 4,
+      "network": "calibrationnet"
+    },
+    {
+      "test": "image_upload",
+      "filename": "test_image.png",
+      "size": 587,
+      "success": true,
+      "cid": "bafybeif772cb428076a4a0df9d700b9963e3bf5cc3a17b2dac7fd28d7b9",
+      "error": null,
+      "duration": 60.287712812423706
+    },
+    {
+      "test": "uri_generation",
+      "cid": "bafybeif772cb428076a4a0df9d700b9963e3bf5cc3a17b2dac7fd28d7b9",
+      "success": true,
+      "ipfs_uri": "ipfs://bafybeif772cb428076a4a0df9d700b9963e3bf5cc3a17b2dac7fd28d7b9",
+      "gateway_url": "https://ipfs.io/ipfs/bafybeif772cb428076a4a0df9d700b9963e3bf5cc3a17b2dac7fd28d7b9",
+      "error": null
+    },
+    {
+      "test": "download_verification",
+      "cid": "bafybeif772cb428076a4a0df9d700b9963e3bf5cc3a17b2dac7fd28d7b9",
+      "success": true,
+      "data_matches": true,
+      "error": null,
+      "duration": 0.00024271011352539062
+    },
+    {
+      "test": "json_upload",
+      "name": "test_metadata",
+      "size": 473,
+      "success": true,
+      "cid": "bafybeife3e67667ec9b71fa818c9cb9521cb091c3d04766d3bd6a4f3f4a",
+      "error": null,
+      "duration": 60.75795578956604
+    },
+    {
+      "test": "json_upload",
+      "name": "complete_nft_metadata",
+      "size": 502,
+      "success": true,
+      "cid": "bafybeif63260617a3e6781d4317e144b9e2c2a072983d30cddc9075fccd",
+      "error": null,
+      "duration": 60.29588294029236
+    }
+  ],
+  "summary": {
+    "total_tests": 9,
+    "passed": 8,
+    "failed": 1,
+    "success_rate": "88.9%",
+    "test_types": {
+      "client_initialization": {
+        "total": 1,
+        "passed": 1
+      },
+      "network_connection": {
+        "total": 1,
+        "passed": 1
+      },
+      "wallet_balance": {
+        "total": 1,
+        "passed": 0
+      },
+      "storage_info": {
+        "total": 1,
+        "passed": 1
+      },
+      "image_upload": {
+        "total": 1,
+        "passed": 1
+      },
+      "uri_generation": {
+        "total": 1,
+        "passed": 1
+      },
+      "download_verification": {
+        "total": 1,
+        "passed": 1
+      },
+      "json_upload": {
+        "total": 2,
+        "passed": 2
+      }
+    }
+  }
+}
