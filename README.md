@@ -122,6 +122,7 @@ flowchart TD
 - ✅ Scripts simplificados para despliegue y verificación
 - ✅ Backend FastAPI integrado y probado
 - ✅ Sistema de logs automatizado
+- ✅ **Sistema IPFS integrado** para almacenamiento descentralizado de metadata NFT
 
 ## Funciones Principales
 
@@ -247,6 +248,15 @@ companya_back/
 │   ├── transaction_logger.py            # Sistema de logs
 │   ├── check_config.py                  # Verificador de configuración
 │   └── tests/                           # Suite de pruebas
+├── IPFS_storage/                         # **🎨 Sistema IPFS para NFT Metadata**
+│   ├── app.py                          # Aplicación Streamlit para uploads
+│   ├── modules/                        # Módulos Python reutilizables
+│   │   ├── pinata_client.py           # Cliente para Pinata IPFS
+│   │   ├── metadata_builder.py        # Generador metadata OpenSea
+│   │   └── upload_logger.py           # Sistema de logs IPFS
+│   ├── uploads/logs/                   # Logs detallados de uploads
+│   ├── view_logs.py                   # Visualizador de logs independiente
+│   └── README.md                      # Documentación IPFS completa
 ├── artifacts/                           # ABI y bytecode (generado)
 ├── hardhat.config.js                     # Configuración de Hardhat
 ├── package.json                          # Dependencias
@@ -370,14 +380,58 @@ curl "http://localhost:8000/servicios/1/evidencia"
 - **Hardhat Docs**: https://hardhat.org/
 - **Solidity Docs**: https://docs.soliditylang.org/
 
+## 🎨 Sistema IPFS para Metadata NFT
+
+### Características
+- **Aplicación Streamlit** para upload intuitivo de imágenes y metadata
+- **Cliente Pinata integrado** para almacenamiento IPFS descentralizado  
+- **Metadata compatible OpenSea** con atributos personalizados
+- **Sistema de logs completo** en formato JSON
+- **Visualizador independiente** para análisis de uploads
+
+### Uso Rápido
+```bash
+# Navegar al sistema IPFS
+cd IPFS_storage
+
+# Configurar entorno virtual
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Configurar credenciales Pinata
+cp .env.example .env
+# Editar .env con tus API keys de Pinata
+
+# Ejecutar aplicación web
+streamlit run app.py
+```
+
+### Flujo de Trabajo IPFS
+1. **Subir imagen** → Obtiene `ipfs://QmImageCID`
+2. **Completar metadata** → Formulario con atributos NFT
+3. **Upload metadata** → Obtiene `ipfs://QmMetadataCID`  
+4. **URI final** → `ipfs://QmMetadataCID` para smart contract
+
+### Scripts Disponibles
+```bash
+python test_connection.py    # Probar conexión Pinata
+python view_logs.py         # Ver logs de uploads
+python example_usage.py     # Ejemplos programáticos
+```
+
+**📚 Documentación completa**: `IPFS_storage/README.md`
+
 ## 📝 Próximos Pasos
 
 1. ✅ Desplegar contrato en Arbitrum Sepolia
 2. ✅ Verificar contrato en Arbiscan
 3. ✅ Configurar y probar backend FastAPI
 4. ✅ Ejecutar suite completa de pruebas
-5. ⭕ Integrar con frontend
-6. ⭕ Preparar para producción
+5. ✅ **Sistema IPFS para metadata NFT implementado**
+6. ⭕ Integrar metadata IPFS con URIs dinámicas del contrato
+7. ⭕ Integrar con frontend
+8. ⭕ Preparar para producción
 
 ## 📞 Soporte
 
