@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Hardhat files
+cache/
+typechain/
+typechain-types/
+artifacts/@openzeppelin/contracts
+
+# Coverage
+coverage/
+coverage.json
+
+# Logs
+logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# ABI exports (optional - include if you want to ignore generated ABI files)
+# abi/
+
+# Test reports
+test-results/
+
+# Gas reports
+gas-report.txt
+
+# Build outputs
+build/
+dist/
+package-lock.json
