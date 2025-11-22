@@ -30,37 +30,37 @@ Este contrato es un MVP para una hackathon que permite crear, gestionar y califi
 
 ```mermaid
 flowchart TD
-    A[Inicio] --> B[POST /servicios/crear]
-    B --> C[Estado: CREADO<br/>NFT creado para destinatario]
+    A[Inicio] --> B[Crear Servicio]
+    B --> C[Estado: CREADO]
     
-    C --> D[POST /servicios/{id}/asignar-acompanante]
-    D --> E[Estado: ENCONTRADO<br/>Acompañante asignado]
+    C --> D[Asignar Acompañante]
+    D --> E[Estado: ENCONTRADO]
     
-    E --> F[POST /servicios/{id}/cambiar-estado]
-    F --> G[Estado: TERMINADO<br/>Servicio completado]
+    E --> F[Cambiar Estado]
+    F --> G[Estado: TERMINADO]
     
-    G --> H[POST /servicios/{id}/cambiar-estado]
-    H --> I[Estado: CALIFICADO<br/>Calificación 1-5 aplicada]
+    G --> H[Cambiar Estado]
+    H --> I[Estado: CALIFICADO]
     
-    I --> J[POST /servicios/{id}/marcar-pagado]
-    J --> K[Estado: PAGADO<br/>NFT de evidencia creado]
+    I --> J[Marcar Pagado]
+    J --> K[Estado: PAGADO]
     
     K --> L[Fin del Flujo]
     
     %% Consultas disponibles en cualquier estado
-    C -.-> M[GET /servicios/{id}/estado]
+    C -.-> M[Consultar Estado]
     E -.-> M
     G -.-> M
     I -.-> M
     K -.-> M
     
-    M --> N[GET /servicios/{id}/calificacion]
-    M --> O[GET /servicios/{id}/acompanante]
-    M --> P[GET /servicios/{id}/evidencia]
-    M --> Q[GET /servicios/{id}/uri]
+    M --> N[Consultar Calificación]
+    M --> O[Consultar Acompañante]
+    M --> P[Consultar Evidencia]
+    M --> Q[Consultar URI]
     
     %% Configuración de metadatos
-    R[POST /configuracion/uri-estado] -.-> S[URIs configuradas<br/>para cada estado]
+    R[Configurar URIs] -.-> S[URIs por Estado]
     S -.-> C
     S -.-> E
     S -.-> G
@@ -86,14 +86,24 @@ flowchart TD
 
 **Endpoints de Cambio de Estado (POST - Gastan Gas):**
 - 🟢 **Verde**: Transiciones principales entre estados
+- **Crear Servicio**: `POST /servicios/crear`
+- **Asignar Acompañante**: `POST /servicios/{id}/asignar-acompanante`
+- **Cambiar Estado**: `POST /servicios/{id}/cambiar-estado`
+- **Marcar Pagado**: `POST /servicios/{id}/marcar-pagado`
 - Cada cambio de estado es una transacción en blockchain
 
 **Endpoints de Consulta (GET - Sin Gas):**
 - 🟣 **Rosa**: Consultas disponibles en cualquier estado
+- **Consultar Estado**: `GET /servicios/{id}/estado`
+- **Consultar Calificación**: `GET /servicios/{id}/calificacion`
+- **Consultar Acompañante**: `GET /servicios/{id}/acompanante`
+- **Consultar Evidencia**: `GET /servicios/{id}/evidencia`
+- **Consultar URI**: `GET /servicios/{id}/uri`
 - Solo lectura, no modifican el estado
 
 **Configuración (POST - Gastan Gas):**
 - 🟠 **Naranja**: Configuración de metadatos por estado
+- **Configurar URIs**: `POST /configuracion/uri-estado`
 - Define las URIs que cambian según el estado del servicio
 
 ### 🎯 Progresión de Estados
