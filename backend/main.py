@@ -154,10 +154,13 @@ def build_and_send_transaction(function_call):
 @app.post("/servicios/crear")
 async def crear_servicio(request: CrearServicioRequest):
     """
-    1. Crear un nuevo servicio NFT
-    - Asigna el NFT a un destinatario
-    - Estado inicial: CREADO (1)
-    - Retorna tokenId
+    Crear Servicio NFT - Estado: CREADO (1)
+
+    Crea un nuevo NFT de servicio para la dirección especificada.
+    Estado inicial: CREADO (1)
+
+    - **Gasta gas** - Transacción en blockchain
+    - **Retorna**: tokenId, destinatario, estado, información de transacción
     """
     try:
         print(f"🎯 Iniciando creación de servicio para: {request.destinatario}")
@@ -206,10 +209,15 @@ async def crear_servicio(request: CrearServicioRequest):
 @app.post("/servicios/{tokenId}/cambiar-estado")
 async def cambiar_estado_servicio(tokenId: int, request: CambiarEstadoRequest):
     """
-    2. Cambiar el estado de un servicio
-    - Estados: 1=CREADO, 2=ENCONTRADO, 3=TERMINADO, 4=CALIFICADO, 5=PAGADO
-    - Si es CALIFICADO (4), se requiere calificación (1-5)
-    - Si es PAGADO (5), crea NFT de evidencia automáticamente
+    Cambiar Estado del Servicio
+
+    Cambia el estado de un servicio NFT en el flujo progresivo.
+
+    - **Gasta gas** - Transacción en blockchain
+    - **Estados**: 1=CREADO, 2=ENCONTRADO, 3=TERMINADO, 4=CALIFICADO, 5=PAGADO
+    - **Calificación**: Solo aplica en estado CALIFICADO (4), valores 1-5
+    - **NFT Evidencia**: Se crea automáticamente en estado PAGADO (5)
+    - **Retorna**: estado anterior, nuevo estado, información de transacción
     """
     try:
         if request.nuevoEstado < 1 or request.nuevoEstado > 5:
@@ -263,9 +271,14 @@ async def cambiar_estado_servicio(tokenId: int, request: CambiarEstadoRequest):
 @app.post("/configuracion/uri-estado")
 async def configurar_uri_estado(request: ConfigurarURIRequest):
     """
-    3. Configurar el URI (metadata) para cada estado
-    - Define el URI que se asignará a los NFTs según su estado
-    - Estados: 1, 2, 3, 4, 5
+    Configurar URI por Estado
+
+    Configura la URI de metadatos para cada estado del servicio NFT.
+
+    - **Gasta gas** - Transacción en blockchain
+    - **Estados**: 1=CREADO, 2=ENCONTRADO, 3=TERMINADO, 4=CALIFICADO, 5=PAGADO
+    - **URI dinámica**: Cada estado puede tener metadatos diferentes
+    - **Retorna**: estado configurado, URI, información de transacción
     """
     try:
         if request.estado < 1 or request.estado > 5:
@@ -300,7 +313,13 @@ async def configurar_uri_estado(request: ConfigurarURIRequest):
 @app.get("/servicios/{tokenId}/estado")
 async def obtener_estado_servicio(tokenId: int):
     """
-    4a. Obtener el estado actual de un servicio
+    Obtener Estado del Servicio
+
+    Consulta el estado actual de un servicio NFT.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: estado numérico (1-5) y nombre del estado
+    - **Estados**: 1=CREADO, 2=ENCONTRADO, 3=TERMINADO, 4=CALIFICADO, 5=PAGADO
     """
     try:
         estado = contract.functions.obtenerEstadoServicio(tokenId).call()
@@ -323,7 +342,13 @@ async def obtener_estado_servicio(tokenId: int):
 @app.get("/servicios/{tokenId}/uri")
 async def obtener_uri_servicio(tokenId: int):
     """
-    4b. Obtener el URI (metadata) de un servicio
+    Obtener URI del Servicio
+
+    Consulta la URI de metadatos actual del servicio NFT.
+
+    - **Sin gas** - Solo lectura
+    - **URI dinámica**: Cambia según el estado del servicio
+    - **Retorna**: URI configurada para el estado actual
     """
     try:
         uri = contract.functions.obtenerURIServicio(tokenId).call()
@@ -335,7 +360,13 @@ async def obtener_uri_servicio(tokenId: int):
 @app.get("/servicios/{tokenId}/calificacion")
 async def obtener_calificacion_servicio(tokenId: int):
     """
-    4c. Obtener la calificación de un servicio
+    Obtener Calificación del Servicio
+
+    Consulta la calificación asignada a un servicio.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: calificación numérica (0-5)
+    - **Nota**: Solo aplica en estado CALIFICADO (4), otros estados retornan 0
     """
     try:
         calificacion = contract.functions.obtenerCalificacionServicio(tokenId).call()
@@ -347,7 +378,13 @@ async def obtener_calificacion_servicio(tokenId: int):
 @app.get("/servicios/{tokenId}/acompanante")
 async def obtener_acompanante(tokenId: int):
     """
-    4d. Obtener el acompañante asignado a un servicio
+    Obtener Acompañante Asignado
+
+    Consulta el acompañante asignado a un servicio.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: dirección del acompañante asignado
+    - **Requerido**: Para avanzar a estados ENCONTRADO y PAGADO
     """
     try:
         acompanante = contract.functions.obtenerAcompanante(tokenId).call()
@@ -371,7 +408,13 @@ async def obtener_evidencia_servicio(tokenId: int):
 @app.get("/servicios/usuario/{usuarioAddress}")
 async def obtener_servicios_usuario(usuarioAddress: str):
     """
-    4f. Obtener todos los servicios de un usuario (NFTs)
+    Listar Servicios por Usuario
+
+    Obtiene todos los servicios NFT de una dirección específica.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: lista de tokenIds que posee el usuario
+    - **Incluye**: Servicios creados y NFTs de evidencia
     """
     try:
         usuario = Web3.to_checksum_address(usuarioAddress)
@@ -402,7 +445,14 @@ async def obtener_servicios_usuario(usuarioAddress: str):
 @app.post("/servicios/{tokenId}/asignar-acompanante")
 async def asignar_acompanante(tokenId: int, request: AsignarAcompananteRequest):
     """
-    Asignar un acompañante a un servicio
+    Asignar Acompañante - Estado: ENCONTRADO (2)
+
+    Asigna un acompañante a un servicio específico.
+    Cambia el estado a ENCONTRADO (2) si estaba en CREADO (1).
+
+    - **Gasta gas** - Transacción en blockchain
+    - **Requerido para**: Avanzar a estados TERMINADO y PAGADO
+    - **Retorna**: tokenId, acompañante, información de transacción
     """
     try:
         acompanante = Web3.to_checksum_address(request.acompanante)
@@ -432,7 +482,14 @@ async def asignar_acompanante(tokenId: int, request: AsignarAcompananteRequest):
 @app.post("/servicios/{tokenId}/marcar-pagado")
 async def marcar_como_pagado(tokenId: int):
     """
-    Marcar un servicio como pagado (crea NFT de evidencia)
+    Marcar como Pagado - Estado: PAGADO (5)
+
+    Marca un servicio como pagado y crea automáticamente un NFT de evidencia.
+    Solo funciona si el servicio está en estado CALIFICADO (4).
+
+    - **Gasta gas** - Transacción en blockchain
+    - **Crea NFT**: Genera automáticamente NFT de evidencia para el acompañante
+    - **Retorna**: tokenId, tokenIdEvidencia, estado, información de transacción
     """
     try:
         function = contract.functions.marcarComoPagado(tokenId)
@@ -470,7 +527,13 @@ async def marcar_como_pagado(tokenId: int):
 @app.get("/info/contrato")
 async def obtener_info_contrato():
     """
-    Obtener información del contrato
+    Información del Contrato
+
+    Obtiene información básica del contrato NFT.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: dirección, nombre, símbolo, próximo tokenId
+    - **Contrato**: ColeccionServiciosNFT (CSNFT)
     """
     try:
         nombre = contract.functions.name().call()
@@ -492,7 +555,13 @@ async def obtener_info_contrato():
 @app.get("/info/cuenta")
 async def obtener_info_cuenta():
     """
-    Obtener información de la cuenta ejecutora
+    Información de Cuenta Ejecutora
+
+    Obtiene información de la cuenta que ejecuta las transacciones.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: dirección y balance en ETH/Wei
+    - **Usada para**: Firmar y enviar transacciones
     """
     try:
         balance = web3.eth.get_balance(ACCOUNT_ADDRESS)
@@ -510,7 +579,13 @@ async def obtener_info_cuenta():
 @app.get("/health")
 async def health_check():
     """
-    Verificar estado de la API y conexión a la red
+    Health Check del Sistema
+
+    Verifica el estado de la API y la conexión a la red blockchain.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: estado de salud, conectividad, número de bloque actual
+    - **Estados**: healthy (conectado), disconnected (sin conexión)
     """
     try:
         is_connected = web3.is_connected()
@@ -530,7 +605,14 @@ async def health_check():
 @app.get("/logs/transacciones")
 async def obtener_logs_transacciones(limit: int = 50):
     """
-    Obtener el historial de transacciones registradas
+    Historial de Transacciones
+
+    Obtiene el historial completo de transacciones ejecutadas por el backend.
+
+    - **Sin gas** - Solo lectura
+    - **Parámetros**: limit (opcional) - número máximo de transacciones a retornar
+    - **Retorna**: lista de transacciones con detalles completos
+    - **Incluye**: hash, función, parámetros, resultado, gas usado
     """
     try:
         from transaction_logger import get_transaction_history
@@ -544,7 +626,13 @@ async def obtener_logs_transacciones(limit: int = 50):
 @app.get("/logs/estadisticas")
 async def obtener_estadisticas_logs():
     """
-    Obtener estadísticas de las transacciones registradas
+    Estadísticas de Logs
+
+    Obtiene estadísticas agregadas de todas las transacciones registradas.
+
+    - **Sin gas** - Solo lectura
+    - **Retorna**: total de transacciones, conteos por función, gas total usado
+    - **Métricas**: éxito/error, funciones más usadas, fechas de primera/última transacción
     """
     try:
         from transaction_logger import get_statistics
@@ -560,7 +648,13 @@ async def obtener_estadisticas_logs():
 @app.get("/logs/transaccion/{tx_hash}")
 async def obtener_transaccion_por_hash(tx_hash: str):
     """
-    Buscar una transacción específica por su hash
+    Buscar Transacción por Hash
+
+    Busca una transacción específica en el registro usando su hash.
+
+    - **Sin gas** - Solo lectura
+    - **Parámetros**: hash de transacción
+    - **Retorna**: detalles completos de la transacción específica
     """
     try:
         from transaction_logger import transaction_logger
