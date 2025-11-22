@@ -248,16 +248,11 @@ contract ColeccionServiciosNFT is ERC721URIStorage {
 
         uint256 index = 0;
         for (uint256 i = 0; i < _nextTokenId && index < balance; i++) {
-            try this.ownerOf(i) returns (address owner) {
-                if (owner == wallet) {
-                    tokenIds[index] = i;
-                    estados[index] = estadosServicios[i];
-                    acompanantes[index] = acompanantesServicios[i];
-                    index++;
-                }
-            } catch {
-                // Token no existe o fue quemado, continuar
-                continue;
+            if (_ownerOf(i) == wallet) {
+                tokenIds[index] = i;
+                estados[index] = estadosServicios[i];
+                acompanantes[index] = acompanantesServicios[i];
+                index++;
             }
         }
 
@@ -287,20 +282,15 @@ contract ColeccionServiciosNFT is ERC721URIStorage {
         totalServicios = balanceOf(wallet);
 
         for (uint256 i = 0; i < _nextTokenId; i++) {
-            try this.ownerOf(i) returns (address owner) {
-                if (owner == wallet) {
-                    uint8 estado = estadosServicios[i];
-                    if (estado == ESTADO_CREADO) {
-                        serviciosCreados++;
-                    } else if (estado == ESTADO_ENCONTRADO) {
-                        serviciosEncontrados++;
-                    } else if (estado == ESTADO_FINALIZADO) {
-                        serviciosFinalizados++;
-                    }
+            if (_ownerOf(i) == wallet) {
+                uint8 estado = estadosServicios[i];
+                if (estado == ESTADO_CREADO) {
+                    serviciosCreados++;
+                } else if (estado == ESTADO_ENCONTRADO) {
+                    serviciosEncontrados++;
+                } else if (estado == ESTADO_FINALIZADO) {
+                    serviciosFinalizados++;
                 }
-            } catch {
-                // Token no existe o fue quemado, continuar
-                continue;
             }
         }
 
@@ -319,15 +309,11 @@ contract ColeccionServiciosNFT is ERC721URIStorage {
      */
     function tieneServiciosActivos(address wallet) public view returns (bool) {
         for (uint256 i = 0; i < _nextTokenId; i++) {
-            try this.ownerOf(i) returns (address owner) {
-                if (
-                    owner == wallet && estadosServicios[i] != ESTADO_FINALIZADO
-                ) {
-                    return true;
-                }
-            } catch {
-                // Token no existe o fue quemado, continuar
-                continue;
+            if (
+                _ownerOf(i) == wallet &&
+                estadosServicios[i] != ESTADO_FINALIZADO
+            ) {
+                return true;
             }
         }
         return false;

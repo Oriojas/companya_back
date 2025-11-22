@@ -3,9 +3,13 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  console.log("======================================================================");
+  console.log(
+    "======================================================================"
+  );
   console.log("🚀 DESPLIEGUE DE CONTRATO NFT EN ARBITRUM SEPOLIA");
-  console.log("======================================================================\n");
+  console.log(
+    "======================================================================\n"
+  );
 
   // Verificar que las variables de entorno estén configuradas
   if (!process.env.PRIVATE_KEY) {
@@ -25,12 +29,20 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("\n👤 Información del deployer:");
   console.log(`   Dirección: ${deployer.address}`);
-  console.log(`   Balance: ${ethers.formatEther(await deployer.provider.getBalance(deployer.address))} ETH`);
+  console.log(
+    `   Balance: ${ethers.formatEther(
+      await deployer.provider.getBalance(deployer.address)
+    )} ETH`
+  );
 
   // Verificar balance suficiente
   const balance = await deployer.provider.getBalance(deployer.address);
   if (ethers.formatEther(balance) < 0.001) {
-    throw new Error(`❌ Balance insuficiente. Necesitas al menos 0.001 ETH. Balance actual: ${ethers.formatEther(balance)} ETH`);
+    throw new Error(
+      `❌ Balance insuficiente. Necesitas al menos 0.001 ETH. Balance actual: ${ethers.formatEther(
+        balance
+      )} ETH`
+    );
   }
 
   console.log("\n🔨 Compilando contrato...");
@@ -40,7 +52,9 @@ async function main() {
   // Desplegar el contrato
   console.log("\n🚀 Desplegando contrato ColeccionServiciosNFT...");
 
-  const ContractFactory = await ethers.getContractFactory("ColeccionServiciosNFT");
+  const ContractFactory = await ethers.getContractFactory(
+    "contracts/ColeccionServiciosNFT.sol:ColeccionServiciosNFT"
+  );
   const contract = await ContractFactory.deploy();
 
   await contract.waitForDeployment();
@@ -57,7 +71,11 @@ async function main() {
   console.log(`   Hash de transacción: ${receipt.hash}`);
   console.log(`   Bloque: ${receipt.blockNumber}`);
   console.log(`   Gas usado: ${receipt.gasUsed.toString()}`);
-  console.log(`   Costo en ETH: ${ethers.formatEther(receipt.gasUsed * receipt.gasPrice)} ETH`);
+  console.log(
+    `   Costo en ETH: ${ethers.formatEther(
+      receipt.gasUsed * receipt.gasPrice
+    )} ETH`
+  );
 
   // Esperar algunos bloques para asegurar que la transacción esté confirmada
   console.log("\n⏳ Esperando confirmaciones...");
@@ -76,7 +94,7 @@ async function main() {
     gasUsed: receipt.gasUsed.toString(),
     deploymentDate: new Date().toISOString(),
     contractSymbol: "CSNFT",
-    contractVersion: "1.0.0"
+    contractVersion: "1.0.0",
   };
 
   // Crear directorio deployments si no existe
@@ -86,12 +104,21 @@ async function main() {
   }
 
   // Guardar archivo de despliegue
-  const deploymentFile = path.join(deploymentsDir, `deployment-${network.name}-${Date.now()}.json`);
+  const deploymentFile = path.join(
+    deploymentsDir,
+    `deployment-${network.name}-${Date.now()}.json`
+  );
   fs.writeFileSync(deploymentFile, JSON.stringify(deploymentInfo, null, 2));
 
   // Actualizar último despliegue
-  const latestDeploymentFile = path.join(deploymentsDir, "latest-deployment.json");
-  fs.writeFileSync(latestDeploymentFile, JSON.stringify(deploymentInfo, null, 2));
+  const latestDeploymentFile = path.join(
+    deploymentsDir,
+    "latest-deployment.json"
+  );
+  fs.writeFileSync(
+    latestDeploymentFile,
+    JSON.stringify(deploymentInfo, null, 2)
+  );
 
   console.log("\n💾 Información del despliegue guardada:");
   console.log(`   Archivo específico: ${deploymentFile}`);
@@ -99,24 +126,42 @@ async function main() {
 
   // Mostrar enlaces útiles
   console.log("\n🔗 Enlaces útiles:");
-  console.log(`   📊 Arbiscan: https://sepolia.arbiscan.io/address/${contractAddress}`);
-  console.log(`   📝 Transacción: https://sepolia.arbiscan.io/tx/${receipt.hash}`);
-  console.log(`   🖼️  OpenSea Testnet: https://testnets.opensea.io/assets/arbitrum-sepolia/${contractAddress}`);
+  console.log(
+    `   📊 Arbiscan: https://sepolia.arbiscan.io/address/${contractAddress}`
+  );
+  console.log(
+    `   📝 Transacción: https://sepolia.arbiscan.io/tx/${receipt.hash}`
+  );
+  console.log(
+    `   🖼️  OpenSea Testnet: https://testnets.opensea.io/assets/arbitrum-sepolia/${contractAddress}`
+  );
 
-  console.log("\n======================================================================");
+  console.log(
+    "\n======================================================================"
+  );
   console.log("✅ DESPLIEGUE COMPLETADO");
-  console.log("======================================================================");
+  console.log(
+    "======================================================================"
+  );
   console.log(`📍 Dirección del contrato: ${contractAddress}`);
-  console.log(`🔗 Arbiscan: https://sepolia.arbiscan.io/address/${contractAddress}`);
-  console.log("======================================================================");
-  console.log("\n🎯 Próximo paso: Ejecuta 'npm run verify' para verificar el contrato en Arbiscan");
-  console.log("======================================================================\n");
+  console.log(
+    `🔗 Arbiscan: https://sepolia.arbiscan.io/address/${contractAddress}`
+  );
+  console.log(
+    "======================================================================"
+  );
+  console.log(
+    "\n🎯 Próximo paso: Ejecuta 'npm run verify' para verificar el contrato en Arbiscan"
+  );
+  console.log(
+    "======================================================================\n"
+  );
 
   return {
     contractAddress,
     transactionHash: receipt.hash,
     blockNumber: receipt.blockNumber,
-    gasUsed: receipt.gasUsed.toString()
+    gasUsed: receipt.gasUsed.toString(),
   };
 }
 
