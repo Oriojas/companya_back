@@ -1,6 +1,6 @@
 """
 NFT Metadata Uploader - Streamlit Application
-Upload images to Filecoin and generate OpenSea-compatible metadata
+Upload images to IPFS and generate OpenSea-compatible metadata
 """
 
 import json
@@ -99,60 +99,67 @@ def validate_image_file(uploaded_file) -> bool:
         return False
 
     # Check file type
-    allowed_types = ["png", "jpg", "jpeg", "gif", "webp"]
-    file_extension = uploaded_file.name.split(".")[-1].lower()
-
-    if file_extension not in allowed_types:
-        st.error(
-            f"❌ Unsupported file type: {file_extension}. "
-            f"Supported formats: {', '.join(allowed_types)}"
-        )
+    allowed_types = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/gif",
+        "image/svg+xml",
+        "image/webp",
+    ]
+    if uploaded_file.type not in allowed_types:
+        st.error(f"❌ Unsupported file type: {uploaded_file.type}")
+        st.info("Supported formats: PNG, JPG, GIF, SVG, WEBP")
         return False
 
-    # Check file size (100MB limit)
-    file_size = uploaded_file.size
-    max_size = 100 * 1024 * 1024  # 100MB in bytes
-
-    if file_size > max_size:
-        st.error(f"❌ File too large. Maximum size is {max_size // (1024 * 1024)}MB")
-        return False
-
-    if file_size == 0:
-        st.error("❌ File is empty")
+    # Check file size (100MB limit for Pinata)
+    if uploaded_file.size > 100 * 1024 * 1024:
+        st.error("❌ File too large. Maximum size is 100MB")
         return False
 
     return True
 
 
 def save_history_entry(entry: Dict[str, Any]):
-    """Save upload history entry"""
+    """Save upload history entry to file"""
+    history_file = os.path.join("uploads", "metadata_history", "upload_history.json")
+
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(history_file), exist_ok=True)
+
+    # Load existing history
+    history = []
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                history = data.get("uploads", [])
+        except:
+            pass
+
+    # Add new entry
+    history.append(entry)
+
+    # Save updated history
     try:
-        logger = UploadLogger()
-        logger.log_upload(
-            filename=entry.get("filename", "unknown"),
-            file_size_bytes=entry.get("file_size_bytes", 0),
-            upload_type=entry.get("upload_type", "unknown"),
-            cid=entry.get("cid", ""),
-            ipfs_uri=entry.get("ipfs_uri", ""),
-            gateway_url=entry.get("gateway_url", ""),
-            nft_name=entry.get("nft_name", ""),
-            json_data=entry.get("json_data"),
-            status="success" if entry.get("success", False) else "failed",
-            error=entry.get("error"),
-        )
+        with open(history_file, "w", encoding="utf-8") as f:
+            json.dump({"uploads": history}, f, indent=2, ensure_ascii=False)
     except Exception as e:
-        st.warning(f"Could not save history entry: {e}")
+        st.warning(f"⚠️ Could not save history: {str(e)}")
 
 
 def load_upload_history() -> list:
-    """Load recent upload history"""
+    """Load upload history from file"""
+    history_file = os.path.join("uploads", "metadata_history", "upload_history.json")
+
+    if not os.path.exists(history_file):
+        return []
+
     try:
-        logger = UploadLogger()
-        log_data = logger.get_upload_history()
-        uploads = log_data.get("uploads", [])
-        return uploads[-5:]  # Return last 5 uploads
-    except Exception as e:
-        st.warning(f"Could not load upload history: {e}")
+        with open(history_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("uploads", [])
+    except:
         return []
 
 
@@ -161,8 +168,8 @@ def main():
 
     # Page configuration
     st.set_page_config(
-        page_title="NFT Filecoin Uploader",
-        page_icon="🔷",
+        page_title="NFT IPFS Uploader",
+        page_icon="🎨",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -171,8 +178,8 @@ def main():
     init_session_state()
 
     # Title and header
-    st.title("🔷 NFT Metadata Uploader - Filecoin Direct")
-    st.markdown("Upload images to Filecoin and generate OpenSea-compatible metadata")
+    st.title("🎨 NFT Metadata Uploader - IPFS Storage")
+    st.markdown("Upload images to IPFS and generate OpenSea-compatible metadata")
 
     # Sidebar
     with st.sidebar:
@@ -261,7 +268,7 @@ def main():
                 st.error("❌ Not connected to Pinata")
                 st.stop()
 
-        else:  # filecoin legacy
+        else:  # filecoin
             if st.session_state.filecoin_client is None:
                 with st.spinner("Testing Filecoin Cloud connection..."):
                     st.session_state.filecoin_client = load_filecoin_client()
@@ -305,254 +312,341 @@ def main():
         history = load_upload_history()
 
         if history:
-            for upload in history[-3:]:  # Show last 3
-                with st.container():
-                    # Format timestamp
-                    timestamp = upload.get("timestamp", "")
-                    try:
-                        dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-                        formatted_time = dt.strftime("%m/%d %H:%M")
-                    except:
-                        formatted_time = timestamp[:16] if timestamp else "Unknown"
-
-                    st.write(f"**{upload.get('nft_name', 'Unknown NFT')}**")
-                    st.caption(f"📅 {formatted_time}")
-
-                    if upload.get("status") == "success":
-                        st.code(f"CID: {upload.get('cid', '')[:20]}...")
-                    else:
-                        st.error("Upload failed")
-
-                    st.divider()
+            # Show last 5 uploads
+            for entry in history[-5:]:
+                with st.expander(f"📄 {entry.get('name', 'Unknown')}"):
+                    st.code(entry.get("nft_uri", ""), language=None)
+                    st.caption(f"Uploaded: {entry.get('timestamp', '')[:19]}")
         else:
-            st.info("No recent uploads")
+            st.info("No uploads yet")
 
-    # Main content tabs
+    # Main content area
     tab1, tab2, tab3 = st.tabs(["🚀 Upload NFT", "📜 History", "📊 Upload Logs"])
 
     with tab1:
-        st.header("🎨 Upload Your NFT")
+        col1, col2 = st.columns([1, 1])
 
-        # File uploader
-        uploaded_file = st.file_uploader(
-            "Choose an image file",
-            type=["png", "jpg", "jpeg", "gif", "webp"],
-            help="Maximum file size: 100MB",
-        )
+        # Left column - Upload and form
+        with col1:
+            st.header("📤 Upload Image")
 
-        if uploaded_file is not None:
-            # Validate file
-            if not validate_image_file(uploaded_file):
-                st.stop()
+            uploaded_file = st.file_uploader(
+                "Choose an image file",
+                type=["png", "jpg", "jpeg", "gif", "svg", "webp"],
+                help="Supported formats: PNG, JPG, GIF, SVG, WEBP (Max: 100MB)",
+            )
 
-            # Show image preview
-            col1, col2 = st.columns([1, 2])
-
-            with col1:
+            if uploaded_file and validate_image_file(uploaded_file):
+                # Display image preview
                 try:
                     image = Image.open(uploaded_file)
-                    st.image(image, caption="Image Preview", use_container_width=True)
-
-                    # Show file info
-                    st.info(
-                        f"**File:** {uploaded_file.name}\n"
-                        f"**Size:** {uploaded_file.size:,} bytes\n"
-                        f"**Type:** {uploaded_file.type}"
+                    st.image(
+                        image,
+                        caption=f"Preview: {uploaded_file.name}",
+                        use_container_width=True,
+                    )
+                    st.success(
+                        f"✅ File loaded: {uploaded_file.name} ({uploaded_file.size:,} bytes)"
                     )
                 except Exception as e:
-                    st.error(f"Error loading image: {e}")
-                    st.stop()
+                    st.error(f"❌ Error loading image: {str(e)}")
+                    uploaded_file = None
 
-            with col2:
-                st.subheader("📝 NFT Metadata")
+            st.divider()
 
-                with st.form("nft_metadata_form"):
-                    # Basic NFT information
-                    name = st.text_input(
-                        "Name *",
-                        placeholder="My Awesome NFT",
-                        help="Name of your NFT",
+            # Metadata form
+            st.header("📝 NFT Metadata")
+
+            with st.form("metadata_form"):
+                # Basic information
+                st.subheader("Basic Information")
+                name = st.text_input(
+                    "NFT Name *",
+                    placeholder="Enter the name of your NFT",
+                    help="This will be the title of your NFT",
+                )
+
+                description = st.text_area(
+                    "Description *",
+                    placeholder="Describe your NFT...",
+                    help="Detailed description of your NFT. Supports markdown.",
+                    height=100,
+                )
+
+                # Specific attributes
+                st.subheader("Attributes")
+                actividad = st.text_input(
+                    "Actividad *",
+                    placeholder="e.g., Swimming, Running, Reading",
+                    help="Activity associated with this NFT",
+                )
+
+                usuario = st.text_input(
+                    "Usuario *",
+                    placeholder="e.g., John Doe",
+                    help="User associated with this NFT",
+                )
+
+                acompanante = st.text_input(
+                    "Acompañante *",
+                    placeholder="e.g., Maria, Solo, Team Alpha",
+                    help="Companion or team associated with this NFT",
+                )
+
+                tiempo = st.number_input(
+                    "Tiempo *",
+                    min_value=0,
+                    max_value=10000,
+                    value=1,
+                    step=1,
+                    help="Time value associated with this NFT",
+                )
+
+                # Form submission
+                submit_button = st.form_submit_button(
+                    "🚀 Upload to IPFS", type="primary"
+                )
+
+                # Validate required fields
+                all_fields_filled = all(
+                    [name, description, actividad, usuario, acompanante, uploaded_file]
+                )
+
+                if submit_button:
+                    if not all_fields_filled:
+                        st.error(
+                            "❌ Please fill all required fields and upload an image"
+                        )
+                    else:
+                        # Process upload
+                        process_upload(
+                            uploaded_file,
+                            name,
+                            description,
+                            actividad,
+                            usuario,
+                            acompanante,
+                            tiempo,
+                        )
+
+        # Right column - Preview and results
+        with col2:
+            st.header("👁️ Preview")
+
+            # Generate preview metadata in real-time
+            if uploaded_file and all(
+                [name, description, actividad, usuario, acompanante]
+            ):
+                try:
+                    preview_metadata = build_nft_metadata(
+                        name=name,
+                        description=description,
+                        image_uri="ipfs://[IMAGE_WILL_BE_UPLOADED]",
+                        actividad=actividad,
+                        usuario=usuario,
+                        acompanante=acompanante,
+                        tiempo=tiempo,
                     )
 
-                    description = st.text_area(
-                        "Description *",
-                        placeholder="Describe your NFT...",
-                        help="Detailed description of your NFT",
-                        height=100,
-                    )
+                    st.subheader("📄 Metadata Preview")
+                    st.code(format_metadata_preview(preview_metadata), language="json")
 
-                    # Custom attributes
-                    st.markdown("**Custom Attributes**")
+                    # Validate metadata
+                    errors = validate_metadata(preview_metadata)
+                    if errors:
+                        st.warning("⚠️ Validation warnings:")
+                        for error in errors:
+                            st.text(f"• {error}")
+                    else:
+                        st.success("✅ Metadata structure is valid")
 
-                    col_attr1, col_attr2 = st.columns(2)
+                except Exception as e:
+                    st.error(f"❌ Error generating preview: {str(e)}")
+            else:
+                st.info("Fill the form to see metadata preview")
 
-                    with col_attr1:
-                        activity = st.text_input(
-                            "Activity",
-                            placeholder="Swimming",
-                            help="Type of activity",
-                        )
+            # Results area
+            if "last_upload_result" in st.session_state:
+                st.divider()
+                st.header("🎉 Upload Results")
 
-                        user = st.text_input(
-                            "User",
-                            placeholder="John Doe",
-                            help="User or creator name",
-                        )
+                result = st.session_state.last_upload_result
 
-                    with col_attr2:
-                        companion = st.text_input(
-                            "Companion",
-                            placeholder="Team Alpha",
-                            help="Companion or team",
-                        )
+                st.success("✅ Upload completed successfully!")
 
-                        time_value = st.number_input(
-                            "Time",
-                            min_value=0,
-                            max_value=10000,
-                            value=5,
-                            help="Time value",
-                        )
+                # Display URIs
+                st.subheader("📋 Generated URIs")
 
-                    # Submit button
-                    submitted = st.form_submit_button(
-                        "🚀 Upload to Filecoin", use_container_width=True
-                    )
+                # Image URI
+                st.text("🖼️ Image URI:")
+                st.code(result["image_uri"], language=None)
 
-                    if submitted:
-                        # Validate required fields
-                        if not name or not description:
-                            st.error("❌ Name and Description are required fields")
-                        else:
-                            # Process upload
-                            with st.spinner("Uploading to Filecoin..."):
-                                try:
-                                    process_upload(
-                                        uploaded_file,
-                                        name,
-                                        description,
-                                        activity,
-                                        user,
-                                        companion,
-                                        time_value,
-                                    )
-                                except Exception as e:
-                                    st.error(f"❌ Upload failed: {str(e)}")
+                # NFT Metadata URI (this is the main URI for the smart contract)
+                st.text("🎯 NFT Token URI (use this in your smart contract):")
+                st.code(result["metadata_uri"], language=None)
+
+                # Gateway URLs for testing
+                st.subheader("🌐 Gateway URLs (for testing)")
+                st.text("Image Gateway:")
+                st.markdown(f"[View Image]({result['image_gateway']})")
+
+                st.text("Metadata Gateway:")
+                st.markdown(f"[View Metadata]({result['metadata_gateway']})")
+
+                # Clear result after showing
+                if st.button("🗑️ Clear Results"):
+                    del st.session_state.last_upload_result
+                    st.rerun()
 
     with tab2:
         st.header("📜 Upload History")
 
         history = load_upload_history()
 
-        if history:
-            st.info(f"Showing {len(history)} recent uploads")
+        if not history:
+            st.info("No uploads yet. Upload your first NFT in the Upload tab!")
+        else:
+            st.success(f"Found {len(history)} uploads")
 
-            for i, upload in enumerate(reversed(history)):
+            # Display history in reverse chronological order
+            for i, entry in enumerate(reversed(history)):
                 with st.expander(
-                    f"🎨 {upload.get('nft_name', 'Unknown NFT')} - {upload.get('timestamp', '')[:19]}"
+                    f"📄 {entry.get('name', f'Upload {len(history) - i}')} - {entry.get('timestamp', '')[:19]}"
                 ):
-                    col1, col2 = st.columns(2)
+                    col1, col2 = st.columns([1, 1])
 
                     with col1:
-                        st.write("**Upload Details:**")
-                        st.write(
-                            f"• **Status:** {'✅ Success' if upload.get('status') == 'success' else '❌ Failed'}"
+                        st.text("NFT Information:")
+                        st.write(f"**Name:** {entry.get('name', 'N/A')}")
+                        st.write(f"**Timestamp:** {entry.get('timestamp', 'N/A')}")
+
+                        st.text("IPFS URIs:")
+                        st.code(
+                            f"Image: {entry.get('image_uri', 'N/A')}", language=None
                         )
-                        st.write(f"• **File:** {upload.get('filename', 'N/A')}")
-
-                        file_size = upload.get("file_size_bytes", 0)
-                        if file_size:
-                            if file_size > 1024 * 1024:
-                                size_str = f"{file_size / (1024 * 1024):.1f} MB"
-                            else:
-                                size_str = f"{file_size / 1024:.1f} KB"
-                            st.write(f"• **Size:** {size_str}")
-
-                        timestamp = upload.get("timestamp", "")
-                        st.write(f"• **Time:** {timestamp}")
-
-                        if upload.get("error"):
-                            st.error(f"**Error:** {upload['error']}")
+                        st.code(
+                            f"NFT URI: {entry.get('nft_uri', 'N/A')}", language=None
+                        )
 
                     with col2:
-                        if upload.get("status") == "success":
-                            st.write("**IPFS Details:**")
-                            cid = upload.get("cid", "N/A")
-                            ipfs_uri = upload.get("ipfs_uri", "N/A")
-                            gateway_url = upload.get("gateway_url", "N/A")
+                        if entry.get("gateway_url"):
+                            st.text("Gateway Links:")
+                            st.markdown(
+                                f"[View Metadata]({entry.get('gateway_url', '')})"
+                            )
 
-                            st.code(f"CID: {cid}", language=None)
-                            st.code(f"URI: {ipfs_uri}", language=None)
-
-                            if gateway_url != "N/A":
-                                st.markdown(f"[🌐 View on Gateway]({gateway_url})")
-
-                            # Show NFT name if available
-                            nft_name = upload.get("nft_name")
-                            if nft_name:
-                                st.write(f"**NFT Name:** {nft_name}")
-
-                        # Show JSON data for metadata uploads
-                        if upload.get("json_data") and st.button(
-                            f"View JSON Data", key=f"json_{i}"
-                        ):
-                            st.json(upload["json_data"])
-        else:
-            st.info("No upload history found")
+                        # Show metadata
+                        if entry.get("metadata"):
+                            with st.expander("View Metadata JSON"):
+                                st.code(
+                                    json.dumps(entry["metadata"], indent=2),
+                                    language="json",
+                                )
 
     with tab3:
-        st.header("📊 Upload Statistics")
+        st.header("📊 Upload Logs")
 
         try:
             logger = UploadLogger()
-            log_data = logger.get_upload_history()
-            uploads = log_data.get("uploads", [])
 
-            if uploads:
-                # Statistics
-                total_uploads = len(uploads)
-                successful = len([u for u in uploads if u.get("status") == "success"])
-                failed = total_uploads - successful
+            # Load logs
+            with open(logger.log_file, "r", encoding="utf-8") as f:
+                log_data = json.load(f)
+
+            if not log_data.get("uploads"):
+                st.info("No upload logs found yet. Upload some files to see logs here!")
+            else:
+                # Stats overview
+                uploads = log_data["uploads"]
+                successful = [u for u in uploads if u.get("status") == "success"]
+                failed = [u for u in uploads if u.get("status") == "failed"]
 
                 col1, col2, col3, col4 = st.columns(4)
 
                 with col1:
-                    st.metric("Total Uploads", total_uploads)
+                    st.metric("Total Uploads", len(uploads))
 
                 with col2:
-                    st.metric("Successful", successful)
+                    st.metric("Successful", len(successful))
 
                 with col3:
-                    st.metric("Failed", failed)
+                    st.metric("Failed", len(failed))
 
                 with col4:
-                    success_rate = (
-                        (successful / total_uploads * 100) if total_uploads > 0 else 0
-                    )
-                    st.metric("Success Rate", f"{success_rate:.1f}%")
+                    total_size = sum(u.get("file_size_bytes", 0) for u in successful)
+                    st.metric("Total Size", f"{total_size / (1024 * 1024):.1f} MB")
 
                 st.divider()
 
-                # Recent uploads table
-                st.subheader("📄 Recent Upload Details")
+                # Filter options
+                col1, col2, col3 = st.columns(3)
 
-                for upload in uploads[-10:]:  # Last 10 uploads
+                with col1:
+                    filter_type = st.selectbox(
+                        "Filter by type:",
+                        ["All", "image", "metadata"],
+                        key="log_filter_type",
+                    )
+
+                with col2:
+                    filter_status = st.selectbox(
+                        "Filter by status:",
+                        ["All", "success", "failed"],
+                        key="log_filter_status",
+                    )
+
+                with col3:
+                    show_count = st.number_input(
+                        "Show last N uploads:",
+                        min_value=5,
+                        max_value=100,
+                        value=20,
+                        step=5,
+                    )
+
+                # Apply filters
+                filtered_uploads = uploads.copy()
+
+                if filter_type != "All":
+                    filtered_uploads = [
+                        u
+                        for u in filtered_uploads
+                        if u.get("upload_type") == filter_type
+                    ]
+
+                if filter_status != "All":
+                    filtered_uploads = [
+                        u for u in filtered_uploads if u.get("status") == filter_status
+                    ]
+
+                # Show last N uploads
+                filtered_uploads = filtered_uploads[-show_count:]
+                filtered_uploads.reverse()  # Most recent first
+
+                st.subheader(f"📄 Upload Log Entries ({len(filtered_uploads)} shown)")
+
+                # Display logs
+                for i, upload in enumerate(filtered_uploads):
+                    status_icon = "✅" if upload.get("status") == "success" else "❌"
+                    type_icon = "🖼️" if upload.get("upload_type") == "image" else "📝"
+
+                    timestamp = upload.get("timestamp", "Unknown")[:19].replace(
+                        "T", " "
+                    )
+                    filename = upload.get("filename", "Unknown")
+                    file_size = upload.get("file_size_bytes", 0)
+
                     with st.expander(
-                        f"{'✅' if upload.get('status') == 'success' else '❌'} "
-                        f"{upload.get('nft_name', 'Unknown')} - "
-                        f"{upload.get('timestamp', '')[:19]}"
+                        f"{status_icon} {type_icon} {filename} - {timestamp} ({file_size:,} bytes)"
                     ):
-                        col1, col2 = st.columns(2)
+                        col1, col2 = st.columns([1, 1])
 
                         with col1:
-                            st.write("**File Information:**")
-                            st.write(f"• **Name:** {upload.get('filename', 'N/A')}")
-
-                            file_size = upload.get("file_size_bytes", 0)
-                            if file_size:
-                                st.write(f"• **Size:** {file_size:,} bytes")
-
-                            timestamp = upload.get("timestamp", "")
+                            st.write("**Upload Details:**")
+                            st.write(f"• **Type:** {upload.get('upload_type', 'N/A')}")
+                            st.write(f"• **Status:** {upload.get('status', 'N/A')}")
+                            st.write(f"• **Filename:** {filename}")
+                            st.write(f"• **Size:** {file_size:,} bytes")
                             st.write(f"• **Timestamp:** {timestamp}")
 
                             if upload.get("error"):
@@ -606,22 +700,21 @@ def main():
                             with open(logger.log_file, "w", encoding="utf-8") as f:
                                 json.dump(log_data, f, indent=2, ensure_ascii=False)
                             st.success("✅ Kept last 50 uploads, older logs cleared")
-
-            else:
-                st.info("No upload statistics available yet")
+                            st.rerun()
 
         except Exception as e:
-            st.error(f"Could not load upload statistics: {e}")
+            st.error(f"❌ Error loading logs: {str(e)}")
+            st.info("Upload some files first to generate logs.")
 
 
 def process_upload(
     uploaded_file,
     name: str,
     description: str,
-    activity: str,
-    user: str,
-    companion: str,
-    time: int,
+    actividad: str,
+    usuario: str,
+    acompanante: str,
+    tiempo: int,
 ):
     """Process the complete upload workflow"""
 
@@ -630,7 +723,7 @@ def process_upload(
 
     try:
         # Step 1: Upload image
-        status_text.text("📤 Uploading image to Filecoin...")
+        status_text.text("📤 Uploading image to IPFS...")
         progress_bar.progress(25)
 
         # Get file bytes - ensure we get the actual bytes
@@ -676,14 +769,14 @@ def process_upload(
             name=name,
             description=description,
             image_uri=image_uri,
-            activity=activity,
-            user=user,
-            companion=companion,
-            time=time,
+            actividad=actividad,
+            usuario=usuario,
+            acompanante=acompanante,
+            tiempo=tiempo,
         )
 
         progress_bar.progress(75)
-        status_text.text("📝 Uploading metadata to Filecoin...")
+        status_text.text("📝 Uploading metadata to IPFS...")
 
         # Step 3: Upload metadata
         metadata_cid = client.upload_json(json_data=metadata, name=f"{name}_metadata")
@@ -728,72 +821,15 @@ def process_upload(
         )
         save_metadata_to_file(metadata, metadata_filepath)
 
-        # Display success message
-        st.success("🎉 Upload completed successfully!")
-
-        # Display results
-        st.subheader("📋 Upload Results")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("**🖼️ Image**")
-            st.success(f"Image uploaded to Filecoin")
-            st.code(f"CID: {image_cid}")
-            st.code(f"URI: {image_uri}")
-            if image_gateway:
-                st.markdown(f"[🌐 View Image]({image_gateway})")
-
-        with col2:
-            st.markdown("**📝 NFT Metadata**")
-            st.success("Metadata uploaded to Filecoin")
-            st.code(f"CID: {metadata_cid}")
-            st.code(f"🎯 Token URI: {metadata_uri}")
-            if metadata_gateway:
-                st.markdown(f"[🌐 View Metadata]({metadata_gateway})")
-
-        # Display final Token URI prominently
-        st.markdown("---")
-        st.subheader("🎯 Final Token URI for Smart Contract")
-        st.code(metadata_uri, language=None)
-        st.info(
-            "💡 Use this Token URI in your ERC-721 smart contract's tokenURI() function"
-        )
-
-        # Show metadata preview
-        st.subheader("📄 Generated Metadata Preview")
-        st.json(metadata)
-
-        # Clear progress indicators
         progress_bar.empty()
         status_text.empty()
+
+        st.rerun()
 
     except Exception as e:
         progress_bar.empty()
         status_text.empty()
         st.error(f"❌ Upload failed: {str(e)}")
-
-        # Log failed upload
-        try:
-            error_entry = {
-                "filename": uploaded_file.name,
-                "file_size_bytes": len(file_bytes) if "file_bytes" in locals() else 0,
-                "upload_type": "image",
-                "cid": "",
-                "ipfs_uri": "",
-                "gateway_url": "",
-                "nft_name": name,
-                "json_data": None,
-                "success": False,
-                "error": str(e),
-                "timestamp": datetime.now().isoformat(),
-                "status": "failed",
-            }
-            save_history_entry(error_entry)
-        except:
-            pass  # Don't fail if logging fails
-
-        raise e
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-11-22T16:30:34.586487",
+  "timestamp": "2025-11-22T17:13:34.736717",
   "tests": [
     {
       "test": "client_initialization",
       "success": true,
       "error": null,
-      "duration": 5.364418029785156e-05,
+      "duration": 4.57763671875e-05,
       "wallet_address": "0xa92d504731aa3e99df20ffd200ed03f9a55a6219",
       "network": "https://api.calibration.node.glif.io/rpc/v1"
     },
@@ -13,20 +13,20 @@
       "test": "network_connection",
       "success": true,
       "error": null,
-      "duration": 1.6549060344696045
+      "duration": 3.6475839614868164
     },
     {
       "test": "wallet_balance",
       "success": false,
       "error": "Failed to get balance",
-      "duration": 2.4983227252960205,
+      "duration": 4.297282695770264,
       "balance": null
     },
     {
       "test": "storage_info",
       "success": true,
       "error": null,
-      "duration": 2.7125136852264404,
+      "duration": 2.3540499210357666,
       "providers": 4,
       "network": "calibrationnet"
     },
@@ -37,7 +37,7 @@
       "success": true,
       "cid": "bafybeif772cb428076a4a0df9d700b9963e3bf5cc3a17b2dac7fd28d7b9",
       "error": null,
-      "duration": 60.287712812423706
+      "duration": 61.41649603843689
     },
     {
       "test": "uri_generation",
@@ -53,25 +53,25 @@
       "success": true,
       "data_matches": true,
       "error": null,
-      "duration": 0.00024271011352539062
+      "duration": 0.0002143383026123047
     },
     {
       "test": "json_upload",
       "name": "test_metadata",
       "size": 473,
       "success": true,
-      "cid": "bafybeife3e67667ec9b71fa818c9cb9521cb091c3d04766d3bd6a4f3f4a",
+      "cid": "bafybeif37adf77d0a20e0145aa169e6351b76b6d4607bf21266bcae2765",
       "error": null,
-      "duration": 60.75795578956604
+      "duration": 60.33196520805359
     },
     {
       "test": "json_upload",
       "name": "complete_nft_metadata",
       "size": 502,
       "success": true,
-      "cid": "bafybeif63260617a3e6781d4317e144b9e2c2a072983d30cddc9075fccd",
+      "cid": "bafybeifcde16ea90d97291711b795e0fc8e8f992a3df5437e3c9381701d",
       "error": null,
-      "duration": 60.29588294029236
+      "duration": 60.295313596725464
     }
   ],
   "summary": {
