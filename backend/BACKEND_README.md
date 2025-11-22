@@ -11,7 +11,7 @@ python3 test_backend_completo.py
 ```
 
 **Características de las pruebas:**
-- ✅ Prueba todos los 17 endpoints documentados
+- ✅ Prueba endpoints principales del backend
 - ✅ Flujo completo de creación y gestión de un servicio
 - ✅ Manejo de errores y validaciones
 - ✅ Logging detallado en tiempo real
@@ -19,7 +19,7 @@ python3 test_backend_completo.py
 - ✅ Compatible con Arbitrum Sepolia
 
 **Resultados esperados:**
-- 19 pruebas ejecutadas en secuencia lógica
+- 8+ pruebas ejecutadas en secuencia lógica
 - Tiempo estimado: 2-5 minutos
 - Genera archivo `test_results_YYYYMMDD_HHMMSS.json` con resultados detallados
 
@@ -45,11 +45,16 @@ Edita el archivo `.env`:
 ```
 PRIVATE_KEY=0xtuclaveprívadadelwallet
 RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
-CONTRACT_ADDRESS=0xFF2E077849546cCB392f9e38B716A40fDC451798
-CHAIN_ID=421614
+# Contract address is automatically loaded from deployments/latest-deployment.json
+# Chain ID is automatically configured for Arbitrum Sepolia
 ```
 
-### 3. Ejecutar Servidor
+### 3. Verificar Configuración
+```bash
+python check_config.py
+```
+
+### 4. Ejecutar Servidor
 ```bash
 python main.py
 ```
@@ -501,10 +506,9 @@ curl "http://localhost:8000/logs/estadisticas"
 └── BACKEND_README.md            # Esta documentación
 ```
 
-**Nota:** El ABI del contrato se carga automáticamente desde los artifacts de Hardhat en:
-```
-/artifacts/contracts/ColeccionServiciosNFT.sol/ColeccionServiciosNFT.json
-```
+**Nota:** 
+- El ABI del contrato se carga automáticamente desde: `../artifacts/contracts/ColeccionServiciosNFT.sol/ColeccionServiciosNFT.json`
+- La dirección del contrato se carga automáticamente desde: `../deployments/latest-deployment.json`
 
 ---
 
@@ -542,7 +546,8 @@ curl "http://localhost:8000/logs/estadisticas"
 | "Connection refused" | Verifica que RPC_URL sea correcto y esté accesible |
 | "Insufficient balance for gas" | El wallet necesita ETH en Arbitrum Sepolia |
 | "Invalid address format" | Verifica que las direcciones tengan formato válido (0x...) |
-| "No se encontró el ABI" | Ejecuta `npm run compile` en la carpeta raíz del proyecto |
+- **No se encontró el ABI**: Ejecuta `npm run compile` en la carpeta raíz del proyecto
+- **Contract address not found**: Ejecuta `npm run deploy` para desplegar el contrato
 | "transfer_log.json no encontrado" | Se crea automáticamente con la primera transacción |
 
 ---
