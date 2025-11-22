@@ -14,6 +14,64 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 # Load environment variables
 load_dotenv()
 
+# Debug flag - set to False in production
+DEBUG = False
+
+
+class UploadLogger:
+    """Simple logger for upload tracking"""
+
+    def __init__(self, log_file: str = "uploads/logs/upload_log.json"):
+        import json
+        from datetime import datetime
+        from pathlib import Path
+
+        self.log_file = Path(log_file)
+        self.log_file.parent.mkdir(parents=True, exist_ok=True)
+
+        if not self.log_file.exists():
+            with open(self.log_file, "w", encoding="utf-8") as f:
+                json.dump(
+                    {"created_at": datetime.now().isoformat(), "uploads": []},
+                    f,
+                    indent=2,
+                )
+
+    def log_upload(
+        self,
+        upload_type,
+        filename,
+        cid,
+        file_size_bytes,
+        ipfs_uri,
+        gateway_url,
+        **kwargs,
+    ):
+        import json
+        from datetime import datetime
+
+        try:
+            with open(self.log_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except:
+            data = {"uploads": []}
+
+        upload_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "upload_type": upload_type,
+            "filename": filename,
+            "cid": cid,
+            "file_size_bytes": file_size_bytes,
+            "ipfs_uri": ipfs_uri,
+            "gateway_url": gateway_url,
+            **kwargs,
+        }
+
+        data["uploads"].append(upload_entry)
+
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
 
 class PinataClient:
     """Client for interacting with Pinata IPFS API"""
@@ -37,6 +95,9 @@ class PinataClient:
             "pinata_api_key": self.api_key,
             "pinata_secret_api_key": self.secret_key,
         }
+
+        # Initialize logger
+        self.logger = UploadLogger()
 
     def test_authentication(self) -> bool:
         """
@@ -75,10 +136,27 @@ class PinataClient:
         Raises:
             Exception: If upload fails
         """
+        if DEBUG:
+            print(f"DEBUG: Uploading file '{filename}' with {len(file_bytes)} bytes")
+
+        if len(file_bytes) == 0:
+            # Log failed upload
+            self.logger.log_upload(
+                upload_type="image",
+                filename=filename,
+                cid="",
+                file_size_bytes=0,
+                ipfs_uri="",
+                gateway_url="",
+                status="failed",
+                error="File is empty (0 bytes)",
+            )
+            raise Exception("File is empty (0 bytes)")
+
         url = f"{self.base_url}/pinning/pinFileToIPFS"
 
         # Prepare files and data for multipart upload
-        files = {"file": (filename, file_bytes)}
+        files = {"file": (filename, file_bytes, "application/octet-stream")}
 
         pin_metadata = metadata or {"name": filename}
         data = {
@@ -86,17 +164,70 @@ class PinataClient:
             "pinataOptions": json.dumps({"cidVersion": 1}),
         }
 
-        response = requests.post(
-            url, headers=self.headers, files=files, data=data, timeout=60
-        )
+        if DEBUG:
+            print(f"DEBUG: Uploading to {url}")
+            print(f"DEBUG: Metadata: {pin_metadata}")
 
-        if response.status_code != 200:
-            raise Exception(
-                f"Failed to upload file: {response.status_code} - {response.text}"
+        try:
+            response = requests.post(
+                url, headers=self.headers, files=files, data=data, timeout=120
             )
 
-        result = response.json()
-        return result["IpfsHash"]
+            if DEBUG:
+                print(f"DEBUG: Response status: {response.status_code}")
+                print(f"DEBUG: Response text: {response.text}")
+
+            if response.status_code != 200:
+                # Log failed upload
+                self.logger.log_upload(
+                    upload_type="image",
+                    filename=filename,
+                    cid="",
+                    file_size_bytes=len(file_bytes),
+                    ipfs_uri="",
+                    gateway_url="",
+                    status="failed",
+                    error=f"HTTP {response.status_code}: {response.text}",
+                )
+                raise Exception(
+                    f"Failed to upload file: {response.status_code} - {response.text}"
+                )
+
+            result = response.json()
+            cid = result["IpfsHash"]
+
+            # Log successful upload
+            ipfs_uri = self.get_ipfs_uri(cid)
+            gateway_url = self.get_gateway_url(cid)
+
+            self.logger.log_upload(
+                upload_type="image",
+                filename=filename,
+                cid=cid,
+                file_size_bytes=len(file_bytes),
+                ipfs_uri=ipfs_uri,
+                gateway_url=gateway_url,
+                status="success",
+                metadata=pin_metadata,
+            )
+
+            if DEBUG:
+                print(f"DEBUG: Upload successful, CID: {cid}")
+            return cid
+
+        except requests.RequestException as e:
+            # Log network error
+            self.logger.log_upload(
+                upload_type="image",
+                filename=filename,
+                cid="",
+                file_size_bytes=len(file_bytes),
+                ipfs_uri="",
+                gateway_url="",
+                status="failed",
+                error=f"Network error: {str(e)}",
+            )
+            raise Exception(f"Network error during upload: {str(e)}")
 
     @retry(
         stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
@@ -123,20 +254,67 @@ class PinataClient:
             "pinataOptions": {"cidVersion": 1},
         }
 
-        response = requests.post(
-            url,
-            headers={**self.headers, "Content-Type": "application/json"},
-            data=json.dumps(payload),
-            timeout=60,
-        )
-
-        if response.status_code != 200:
-            raise Exception(
-                f"Failed to upload JSON: {response.status_code} - {response.text}"
+        try:
+            response = requests.post(
+                url,
+                headers={**self.headers, "Content-Type": "application/json"},
+                data=json.dumps(payload),
+                timeout=60,
             )
 
-        result = response.json()
-        return result["IpfsHash"]
+            if response.status_code != 200:
+                # Log failed upload
+                self.logger.log_upload(
+                    upload_type="metadata",
+                    filename=f"{name}.json",
+                    cid="",
+                    file_size_bytes=len(json.dumps(json_data).encode("utf-8")),
+                    ipfs_uri="",
+                    gateway_url="",
+                    status="failed",
+                    error=f"HTTP {response.status_code}: {response.text}",
+                    json_data=json_data,
+                )
+                raise Exception(
+                    f"Failed to upload JSON: {response.status_code} - {response.text}"
+                )
+
+            result = response.json()
+            cid = result["IpfsHash"]
+
+            # Log successful upload
+            ipfs_uri = self.get_ipfs_uri(cid)
+            gateway_url = self.get_gateway_url(cid)
+            file_size = len(json.dumps(json_data).encode("utf-8"))
+
+            self.logger.log_upload(
+                upload_type="metadata",
+                filename=f"{name}.json",
+                cid=cid,
+                file_size_bytes=file_size,
+                ipfs_uri=ipfs_uri,
+                gateway_url=gateway_url,
+                status="success",
+                json_data=json_data,
+                nft_name=json_data.get("name", "Unknown"),
+            )
+
+            return cid
+
+        except requests.RequestException as e:
+            # Log network error
+            self.logger.log_upload(
+                upload_type="metadata",
+                filename=f"{name}.json",
+                cid="",
+                file_size_bytes=len(json.dumps(json_data).encode("utf-8")),
+                ipfs_uri="",
+                gateway_url="",
+                status="failed",
+                error=f"Network error: {str(e)}",
+                json_data=json_data,
+            )
+            raise Exception(f"Network error during JSON upload: {str(e)}")
 
     def get_ipfs_uri(self, cid: str) -> str:
         """

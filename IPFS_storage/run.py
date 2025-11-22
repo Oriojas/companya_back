@@ -77,23 +77,7 @@ def main():
 
     try:
         # Run Streamlit
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "streamlit",
-                "run",
-                "app.py",
-                "--theme.base",
-                "light",
-                "--theme.primaryColor",
-                "#FF6B6B",
-                "--theme.backgroundColor",
-                "#FFFFFF",
-                "--theme.secondaryBackgroundColor",
-                "#F0F2F6",
-            ]
-        )
+        subprocess.run([sys.executable, "-m", "streamlit", "run", "app.py"])
     except KeyboardInterrupt:
         print("\n👋 Application stopped by user")
     except Exception as e:

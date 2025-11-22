@@ -9,6 +9,7 @@ Una aplicación web construida con Streamlit para subir imágenes a IPFS y gener
 - **Interfaz amigable**: Aplicación web intuitiva con Streamlit
 - **Atributos personalizados**: Formulario específico para atributos de NFT
 - **Historial de uploads**: Mantiene registro de todas las subidas
+- **Sistema de logs completo**: Registro detallado en formato JSON de todos los uploads
 - **URIs IPFS**: Genera URIs finales para usar en smart contracts
 
 ## 📁 Estructura del Proyecto
@@ -21,11 +22,13 @@ IPFS_storage/
 │   └── metadata_builder.py   # Generador de metadata OpenSea
 ├── uploads/
 │   ├── temp_images/          # Imágenes temporales
-│   └── metadata_history/     # Historial y JSONs generados
+│   ├── metadata_history/     # Historial y JSONs generados
+│   └── logs/                 # Logs de uploads en formato JSON
 ├── app.py                    # Aplicación Streamlit principal
 ├── requirements.txt          # Dependencias Python
 ├── .env                      # Variables de entorno (no incluido)
 ├── .env.example             # Template de configuración
+├── view_logs.py             # Visualizador de logs independiente
 └── README.md                # Esta documentación
 ```
 
@@ -109,6 +112,7 @@ La aplicación se abrirá en tu navegador en `http://localhost:8501`
    - **Tiempo**: Valor numérico de tiempo
 3. **Upload a IPFS**: Haz clic en "🚀 Upload to IPFS"
 4. **Obtener URIs**: Copia la URI final para usar en tu smart contract
+5. **Ver logs**: Revisa el tab "📊 Upload Logs" para ver estadísticas detalladas
 
 ## 📝 Formato de Metadata
 
@@ -190,12 +194,63 @@ metadata = build_nft_metadata(
 ### Tabs Principales
 - **🚀 Upload NFT**: Formulario de upload principal
 - **📜 History**: Historial completo de uploads
+- **📊 Upload Logs**: Sistema completo de logs y estadísticas
 
 ### Validaciones
 - Formato de archivos soportados
 - Tamaño máximo (100MB para Pinata)
 - Campos requeridos
 - Estructura de metadata
+
+## 📊 Sistema de Logs
+
+### Logs Automáticos
+Cada upload (exitoso o fallido) se registra automáticamente en `uploads/logs/upload_log.json` con:
+
+- **Información del archivo**: Nombre, tamaño, tipo
+- **Datos IPFS**: CID, URI, enlaces de gateway
+- **Metadata del NFT**: Información completa del token
+- **Estadísticas**: Tiempo de upload, estado, errores
+- **Trazabilidad**: Relación entre imágenes y metadata
+
+### Ver Logs en la App
+```
+Tab "📊 Upload Logs" en Streamlit:
+- 📈 Estadísticas generales
+- 📄 Lista de uploads recientes
+- 🔍 Filtros por tipo y estado
+- 📥 Exportar logs a JSON/CSV
+- 🗑️ Limpiar logs antiguos
+```
+
+### Visualizador Independiente
+```bash
+# Modo interactivo
+python view_logs.py
+
+# Comandos directos
+python view_logs.py stats           # Estadísticas
+python view_logs.py recent 20       # Últimos 20 uploads  
+python view_logs.py nfts           # Pares NFT completos
+python view_logs.py failed         # Uploads fallidos
+python view_logs.py export json    # Exportar logs
+```
+
+### Estructura del Log
+```json
+{
+  "timestamp": "2024-01-01T10:00:00",
+  "upload_type": "image|metadata",
+  "status": "success|failed",
+  "filename": "image.png",
+  "file_size_bytes": 1024000,
+  "cid": "QmXxxxxx",
+  "ipfs_uri": "ipfs://QmXxxxxx",
+  "gateway_url": "https://gateway.pinata.cloud/ipfs/QmXxxxxx",
+  "nft_name": "My NFT #001",
+  "error": "Error message (if failed)"
+}
+```
 
 ## 🔧 Solución de Problemas
 
@@ -274,6 +329,28 @@ Para contribuir al proyecto:
 2. Crea una rama para tu feature
 3. Implementa cambios con tests
 4. Envía pull request
+
+## 🧪 Testing y Debugging
+
+### Scripts de Diagnóstico
+```bash
+# Probar conexión a Pinata
+python test_connection.py
+
+# Test de upload completo
+python test_upload.py
+
+# Ver logs detallados
+python view_logs.py
+
+# Ejemplos de uso programático
+python example_usage.py
+```
+
+### Archivos de Log
+- **uploads/logs/upload_log.json**: Log principal con todos los uploads
+- **uploads/metadata_history/**: JSONs individuales de cada NFT
+- **uploads/logs/export_*.json**: Exportaciones de logs
 
 ## 📄 Licencia
 

@@ -24,6 +24,7 @@ from metadata_builder import (
     validate_metadata,
 )
 from pinata_client import PinataClient
+from upload_logger import UploadLogger
 
 
 def init_session_state():
@@ -184,7 +185,7 @@ def main():
             st.info("No uploads yet")
 
     # Main content area
-    tab1, tab2 = st.tabs(["🚀 Upload NFT", "📜 History"])
+    tab1, tab2, tab3 = st.tabs(["🚀 Upload NFT", "📜 History", "📊 Upload Logs"])
 
     with tab1:
         col1, col2 = st.columns([1, 1])
@@ -206,7 +207,7 @@ def main():
                     st.image(
                         image,
                         caption=f"Preview: {uploaded_file.name}",
-                        use_column_width=True,
+                        use_container_width=True,
                     )
                     st.success(
                         f"✅ File loaded: {uploaded_file.name} ({uploaded_file.size:,} bytes)"
@@ -406,6 +407,169 @@ def main():
                                     language="json",
                                 )
 
+    with tab3:
+        st.header("📊 Upload Logs")
+
+        try:
+            logger = UploadLogger()
+
+            # Load logs
+            with open(logger.log_file, "r", encoding="utf-8") as f:
+                log_data = json.load(f)
+
+            if not log_data.get("uploads"):
+                st.info("No upload logs found yet. Upload some files to see logs here!")
+            else:
+                # Stats overview
+                uploads = log_data["uploads"]
+                successful = [u for u in uploads if u.get("status") == "success"]
+                failed = [u for u in uploads if u.get("status") == "failed"]
+
+                col1, col2, col3, col4 = st.columns(4)
+
+                with col1:
+                    st.metric("Total Uploads", len(uploads))
+
+                with col2:
+                    st.metric("Successful", len(successful))
+
+                with col3:
+                    st.metric("Failed", len(failed))
+
+                with col4:
+                    total_size = sum(u.get("file_size_bytes", 0) for u in successful)
+                    st.metric("Total Size", f"{total_size / (1024 * 1024):.1f} MB")
+
+                st.divider()
+
+                # Filter options
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    filter_type = st.selectbox(
+                        "Filter by type:",
+                        ["All", "image", "metadata"],
+                        key="log_filter_type",
+                    )
+
+                with col2:
+                    filter_status = st.selectbox(
+                        "Filter by status:",
+                        ["All", "success", "failed"],
+                        key="log_filter_status",
+                    )
+
+                with col3:
+                    show_count = st.number_input(
+                        "Show last N uploads:",
+                        min_value=5,
+                        max_value=100,
+                        value=20,
+                        step=5,
+                    )
+
+                # Apply filters
+                filtered_uploads = uploads.copy()
+
+                if filter_type != "All":
+                    filtered_uploads = [
+                        u
+                        for u in filtered_uploads
+                        if u.get("upload_type") == filter_type
+                    ]
+
+                if filter_status != "All":
+                    filtered_uploads = [
+                        u for u in filtered_uploads if u.get("status") == filter_status
+                    ]
+
+                # Show last N uploads
+                filtered_uploads = filtered_uploads[-show_count:]
+                filtered_uploads.reverse()  # Most recent first
+
+                st.subheader(f"📄 Upload Log Entries ({len(filtered_uploads)} shown)")
+
+                # Display logs
+                for i, upload in enumerate(filtered_uploads):
+                    status_icon = "✅" if upload.get("status") == "success" else "❌"
+                    type_icon = "🖼️" if upload.get("upload_type") == "image" else "📝"
+
+                    timestamp = upload.get("timestamp", "Unknown")[:19].replace(
+                        "T", " "
+                    )
+                    filename = upload.get("filename", "Unknown")
+                    file_size = upload.get("file_size_bytes", 0)
+
+                    with st.expander(
+                        f"{status_icon} {type_icon} {filename} - {timestamp} ({file_size:,} bytes)"
+                    ):
+                        col1, col2 = st.columns([1, 1])
+
+                        with col1:
+                            st.write("**Upload Details:**")
+                            st.write(f"• **Type:** {upload.get('upload_type', 'N/A')}")
+                            st.write(f"• **Status:** {upload.get('status', 'N/A')}")
+                            st.write(f"• **Filename:** {filename}")
+                            st.write(f"• **Size:** {file_size:,} bytes")
+                            st.write(f"• **Timestamp:** {timestamp}")
+
+                            if upload.get("error"):
+                                st.error(f"**Error:** {upload['error']}")
+
+                        with col2:
+                            if upload.get("status") == "success":
+                                st.write("**IPFS Details:**")
+                                cid = upload.get("cid", "N/A")
+                                ipfs_uri = upload.get("ipfs_uri", "N/A")
+                                gateway_url = upload.get("gateway_url", "N/A")
+
+                                st.code(f"CID: {cid}", language=None)
+                                st.code(f"URI: {ipfs_uri}", language=None)
+
+                                if gateway_url != "N/A":
+                                    st.markdown(f"[🌐 View on Gateway]({gateway_url})")
+
+                                # Show NFT name if available
+                                nft_name = upload.get("nft_name")
+                                if nft_name:
+                                    st.write(f"**NFT Name:** {nft_name}")
+
+                            # Show JSON data for metadata uploads
+                            if upload.get("json_data") and st.button(
+                                f"View JSON Data", key=f"json_{i}"
+                            ):
+                                st.json(upload["json_data"])
+
+                st.divider()
+
+                # Export options
+                st.subheader("📥 Export Logs")
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    if st.button("📄 Download JSON Log"):
+                        json_str = json.dumps(log_data, indent=2, ensure_ascii=False)
+                        st.download_button(
+                            label="💾 Download upload_log.json",
+                            data=json_str,
+                            file_name=f"upload_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                            mime="application/json",
+                        )
+
+                with col2:
+                    if st.button("🗑️ Clear Old Logs"):
+                        # Keep only last 50 uploads
+                        if len(uploads) > 50:
+                            log_data["uploads"] = uploads[-50:]
+                            with open(logger.log_file, "w", encoding="utf-8") as f:
+                                json.dump(log_data, f, indent=2, ensure_ascii=False)
+                            st.success("✅ Kept last 50 uploads, older logs cleared")
+                            st.rerun()
+
+        except Exception as e:
+            st.error(f"❌ Error loading logs: {str(e)}")
+            st.info("Upload some files first to generate logs.")
+
 
 def process_upload(
     uploaded_file,
@@ -426,9 +590,14 @@ def process_upload(
         status_text.text("📤 Uploading image to IPFS...")
         progress_bar.progress(25)
 
-        # Get file bytes
-        file_bytes = uploaded_file.read()
-        uploaded_file.seek(0)  # Reset file pointer
+        # Get file bytes - ensure we get the actual bytes
+        uploaded_file.seek(0)  # Reset file pointer to beginning
+        file_bytes = uploaded_file.getvalue()  # Use getvalue() for UploadedFile
+
+        # Validate file size
+        if len(file_bytes) == 0:
+            st.error("❌ File is empty (0 bytes). Please select a valid image.")
+            return
 
         # Upload image to Pinata
         image_cid = st.session_state.pinata_client.upload_file(
