@@ -27,14 +27,27 @@ class FilecoinDirectClient:
         """Initialize Filecoin Direct client"""
         self.private_key = os.getenv("FILECOIN_PRIVATE_KEY")
         self.wallet_address = os.getenv("FILECOIN_WALLET_ADDRESS")
-        self.rpc_url = os.getenv(
-            "FILECOIN_RPC_URL", "https://api.calibration.node.glif.io/rpc/v1"
-        )
+
+        # Native Filecoin RPC endpoints (only working endpoints, ordered by speed)
+        self.rpc_urls = [
+            "https://rpc.ankr.com/filecoin_testnet",  # Ankr - fastest: 778ms
+            os.getenv(
+                "FILECOIN_RPC_URL", "https://api.calibration.node.glif.io/rpc/v1"
+            ),  # Glif - official: 2984ms
+            "https://filecoin-calibration.chainup.net/rpc/v1",  # ChainupCloud: 6517ms
+        ]
+        self.current_rpc_index = 0
+        self.rpc_url = self.rpc_urls[0]
+
+        # Connection settings
+        self.max_retries = 3
+        self.retry_delay = 2  # seconds
+        self.timeout = 45  # increased timeout
 
         if not self.private_key:
             raise ValueError("FILECOIN_PRIVATE_KEY not found in environment variables")
 
-        # IPFS endpoints for data upload
+        # IPFS endpoints for data upload (no lighthouse)
         self.ipfs_endpoints = [
             {
                 "name": "web3.storage",
@@ -45,11 +58,6 @@ class FilecoinDirectClient:
                 "name": "nft.storage",
                 "url": "https://api.nft.storage",
                 "token": os.getenv("NFT_STORAGE_TOKEN"),
-            },
-            {
-                "name": "lighthouse",
-                "url": "https://node.lighthouse.storage",
-                "token": os.getenv("LIGHTHOUSE_API_KEY"),
             },
         ]
 
@@ -65,15 +73,83 @@ class FilecoinDirectClient:
         self.ipfs_gateways = [
             "https://ipfs.io/ipfs/",
             "https://gateway.pinata.cloud/ipfs/",
-            "https://w3s.link/ipfs/",
-            "https://dweb.link/ipfs/",
             "https://cloudflare-ipfs.com/ipfs/",
+            "https://dweb.link/ipfs/",
         ]
 
+    def _try_next_rpc_url(self):
+        """Switch to next available RPC URL"""
+        self.current_rpc_index = (self.current_rpc_index + 1) % len(self.rpc_urls)
+        self.rpc_url = self.rpc_urls[self.current_rpc_index]
+        print(f"Switching to RPC URL: {self.rpc_url}")
+
+    def _make_rpc_request(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Make RPC request with retry logic and fallback URLs"""
+        original_rpc_index = self.current_rpc_index
+
+        # Try all RPC URLs
+        for rpc_attempt in range(len(self.rpc_urls)):
+            # For each URL, try multiple times
+            for attempt in range(self.max_retries):
+                try:
+                    response = requests.post(
+                        self.rpc_url, json=payload, timeout=self.timeout
+                    )
+
+                    if response.status_code == 200:
+                        return response.json()
+                    elif response.status_code == 429:  # Rate limited
+                        if attempt < self.max_retries - 1:
+                            time.sleep(self.retry_delay * (attempt + 1))
+                            continue
+                        else:
+                            # Try next RPC URL
+                            break
+                    else:
+                        # Try next attempt or next RPC URL
+                        break
+
+                except requests.exceptions.Timeout:
+                    if attempt < self.max_retries - 1:
+                        time.sleep(self.retry_delay)
+                        continue
+                    else:
+                        # Try next RPC URL
+                        break
+
+                except requests.exceptions.ConnectionError:
+                    if attempt < self.max_retries - 1:
+                        time.sleep(self.retry_delay)
+                        continue
+                    else:
+                        # Try next RPC URL
+                        break
+
+                except Exception as e:
+                    if attempt < self.max_retries - 1:
+                        time.sleep(self.retry_delay)
+                        continue
+                    else:
+                        # Try next RPC URL
+                        break
+
+            # Move to next RPC URL if we haven't tried all of them
+            if rpc_attempt < len(self.rpc_urls) - 1:
+                self._try_next_rpc_url()
+                time.sleep(1)  # Brief pause before trying next URL
+
+        # Reset to original RPC index
+        self.current_rpc_index = original_rpc_index
+        self.rpc_url = self.rpc_urls[self.current_rpc_index]
+
+        # If we've tried all URLs and all retries, raise appropriate error
+        raise ConnectionError(
+            f"No se pudo conectar a ningún endpoint de Filecoin después de intentar {len(self.rpc_urls)} URLs con {self.max_retries} reintentos cada una"
+        )
+
     def test_authentication(self) -> bool:
-        """Test if we can connect to Filecoin network"""
+        """Test connection to Filecoin RPC with retry logic"""
         try:
-            # Test RPC connection
             payload = {
                 "jsonrpc": "2.0",
                 "method": "Filecoin.ChainHead",
@@ -81,26 +157,24 @@ class FilecoinDirectClient:
                 "id": 1,
             }
 
-            response = requests.post(self.rpc_url, json=payload, timeout=10)
+            result = self._make_rpc_request(payload)
 
-            if response.status_code == 200:
-                result = response.json()
-                if "result" in result:
-                    print("✅ Filecoin RPC connection successful")
-                    return True
+            if result and "result" in result:
+                return True
 
             return False
 
         except Exception as e:
-            print(f"❌ Filecoin RPC connection failed: {e}")
+            print(f"Authentication test failed: {e}")
             return False
 
     def _upload_to_ipfs(self, file_bytes: bytes, filename: str) -> Optional[str]:
         """Upload file to IPFS using available endpoints"""
 
         # Try each IPFS endpoint
+        # Try uploading to different IPFS endpoints
         for endpoint in self.ipfs_endpoints:
-            if not endpoint["token"]:
+            if not endpoint.get("token"):
                 continue
 
             try:
@@ -110,11 +184,9 @@ class FilecoinDirectClient:
                     cid = self._upload_to_web3_storage(file_bytes, filename, endpoint)
                 elif endpoint["name"] == "nft.storage":
                     cid = self._upload_to_nft_storage(file_bytes, filename, endpoint)
-                elif endpoint["name"] == "lighthouse":
-                    cid = self._upload_to_lighthouse(file_bytes, filename, endpoint)
 
                 if cid:
-                    print(f"✅ IPFS upload successful via {endpoint['name']}: {cid}")
+                    print(f"✅ Successfully uploaded to {endpoint['name']}")
                     return cid
 
             except Exception as e:
@@ -161,25 +233,6 @@ class FilecoinDirectClient:
         if response.status_code == 200:
             result = response.json()
             return result.get("value", {}).get("cid")
-        return None
-
-    def _upload_to_lighthouse(
-        self, file_bytes: bytes, filename: str, endpoint: Dict
-    ) -> Optional[str]:
-        """Upload to Lighthouse"""
-        headers = {"Authorization": f"Bearer {endpoint['token']}"}
-        files = {"file": (filename, file_bytes)}
-
-        response = requests.post(
-            f"{endpoint['url']}/api/v0/add",
-            headers=headers,
-            files=files,
-            timeout=60,
-        )
-
-        if response.status_code == 200:
-            result = response.json()
-            return result.get("Hash")
         return None
 
     def _create_deterministic_cid(self, file_bytes: bytes, filename: str) -> str:
@@ -323,7 +376,7 @@ class FilecoinDirectClient:
         return json.loads(json_bytes.decode("utf-8"))
 
     def get_balance(self) -> Dict[str, Any]:
-        """Get wallet balance from Filecoin network"""
+        """Get wallet balance from Filecoin network with retry logic"""
         try:
             payload = {
                 "jsonrpc": "2.0",
@@ -332,22 +385,17 @@ class FilecoinDirectClient:
                 "id": 1,
             }
 
-            response = requests.post(self.rpc_url, json=payload, timeout=10)
+            result = self._make_rpc_request(payload)
 
-            if response.status_code == 200:
-                result = response.json()
-                if "result" in result:
-                    balance_wei = int(result["result"])
-                    balance_fil = balance_wei / (10**18)  # Convert from attoFIL to FIL
+            if result and "result" in result:
+                balance_attoFIL = int(result["result"])
+                balance_FIL = balance_attoFIL / (10**18)  # Convert from attoFIL to FIL
 
-                    return {
-                        "success": True,
-                        "balances": {
-                            "FIL": str(balance_fil),
-                            "attoFIL": str(balance_wei),
-                        },
-                        "timestamp": datetime.now().isoformat(),
-                    }
+                return {
+                    "success": True,
+                    "balances": {"FIL": f"{balance_FIL:.6f}"},
+                    "raw_balance": balance_attoFIL,
+                }
 
             return {"success": False, "error": "Failed to get balance"}
 
@@ -365,13 +413,11 @@ class FilecoinDirectClient:
                 "id": 1,
             }
 
-            response = requests.post(self.rpc_url, json=payload, timeout=10)
+            result = self._make_rpc_request(payload)
 
             network_name = "calibration"  # default
-            if response.status_code == 200:
-                result = response.json()
-                if "result" in result:
-                    network_name = result["result"]
+            if result and "result" in result:
+                network_name = result["result"]
 
             return {
                 "success": True,

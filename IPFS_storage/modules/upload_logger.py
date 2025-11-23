@@ -435,6 +435,65 @@ class UploadLogger:
 
         return type_mapping.get(extension, "application/octet-stream")
 
+    def filter_ignored_cids(self, ignored_cids: set) -> int:
+        """
+        Filter out uploads with ignored CIDs from the log
+
+        Args:
+            ignored_cids: Set of CIDs to remove from logs
+
+        Returns:
+            int: Number of entries removed
+        """
+        if not ignored_cids:
+            return 0
+
+        data = self._load_log_data()
+        original_count = len(data["uploads"])
+
+        # Filter out uploads with ignored CIDs
+        data["uploads"] = [
+            upload
+            for upload in data["uploads"]
+            if upload.get("ipfs_info", {}).get("cid", "") not in ignored_cids
+            and upload.get("cid", "") not in ignored_cids
+        ]
+
+        filtered_count = len(data["uploads"])
+        removed_count = original_count - filtered_count
+
+        if removed_count > 0:
+            self._save_log_data(data)
+
+        return removed_count
+
+    def get_recent_uploads_filtered(
+        self, limit: int = 10, ignored_cids: set = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent uploads filtered by ignored CIDs
+
+        Args:
+            limit: Maximum number of uploads to return
+            ignored_cids: Set of CIDs to ignore
+
+        Returns:
+            list: Recent uploads (filtered)
+        """
+        data = self._load_log_data()
+        uploads = data["uploads"]
+
+        # Filter out ignored CIDs if provided
+        if ignored_cids:
+            uploads = [
+                upload
+                for upload in uploads
+                if upload.get("ipfs_info", {}).get("cid", "") not in ignored_cids
+                and upload.get("cid", "") not in ignored_cids
+            ]
+
+        return uploads[-limit:]
+
     def get_dashboard_data(self) -> Dict[str, Any]:
         """
         Get data formatted for dashboard display

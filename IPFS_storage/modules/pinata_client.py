@@ -343,15 +343,16 @@ class PinataClient:
         """
         return f"{gateway}/ipfs/{cid}"
 
-    def get_pin_list(self, limit: int = 10) -> Dict[str, Any]:
+    def get_pin_list(self, limit: int = 10, ignored_cids: set = None) -> Dict[str, Any]:
         """
         Get list of pinned content
 
         Args:
             limit: Maximum number of items to return
+            ignored_cids: Set of CIDs to ignore/filter out
 
         Returns:
-            dict: Response with pinned content list
+            dict: Response with pinned content list (filtered)
         """
         try:
             params = {"pageLimit": limit, "pageOffset": 0}
@@ -364,7 +365,26 @@ class PinataClient:
             )
 
             if response.status_code == 200:
-                return response.json()
+                data = response.json()
+
+                # Filter out ignored CIDs if provided
+                if ignored_cids and "rows" in data:
+                    original_count = len(data["rows"])
+                    data["rows"] = [
+                        row
+                        for row in data["rows"]
+                        if row.get("ipfs_pin_hash") not in ignored_cids
+                    ]
+                    filtered_count = len(data["rows"])
+
+                    # Add info about filtered items
+                    data["filtered_info"] = {
+                        "original_count": original_count,
+                        "filtered_count": filtered_count,
+                        "ignored_items": original_count - filtered_count,
+                    }
+
+                return data
             else:
                 return {"error": f"Failed to get pin list: {response.status_code}"}
 

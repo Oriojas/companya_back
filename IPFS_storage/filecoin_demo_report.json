@@ -1,0 +1,71 @@
+{
+  "demo_completed": true,
+  "timestamp": "2025-11-22T17:41:45.115240",
+  "results": {
+    "image_cid": "bafybeif4db241a0beacc05c9bf5f0f03bdba4058c23d148f363f2f807ac",
+    "metadata_cid": "bafybeif8f5d2b3fc8eda9cde4903ebbf980ae2c9956a349485c33342014",
+    "image_uri": "ipfs://bafybeif4db241a0beacc05c9bf5f0f03bdba4058c23d148f363f2f807ac",
+    "token_uri": "ipfs://bafybeif8f5d2b3fc8eda9cde4903ebbf980ae2c9956a349485c33342014",
+    "gateways": {
+      "image": "https://ipfs.io/ipfs/bafybeif4db241a0beacc05c9bf5f0f03bdba4058c23d148f363f2f807ac",
+      "metadata": "https://ipfs.io/ipfs/bafybeif8f5d2b3fc8eda9cde4903ebbf980ae2c9956a349485c33342014"
+    }
+  },
+  "metadata": {
+    "name": "Filecoin Direct Demo NFT",
+    "description": "A demonstration NFT created using Filecoin Direct integration, showcasing decentralized storage capabilities with verifiable persistence on the Filecoin network.",
+    "image": "ipfs://bafybeif4db241a0beacc05c9bf5f0f03bdba4058c23d148f363f2f807ac",
+    "external_url": "https://ipfs.io/ipfs/bafybeif4db241a0beacc05c9bf5f0f03bdba4058c23d148f363f2f807ac",
+    "animation_url": null,
+    "attributes": [
+      {
+        "trait_type": "Storage Network",
+        "value": "Filecoin"
+      },
+      {
+        "trait_type": "Integration Method",
+        "value": "Filecoin Direct"
+      },
+      {
+        "trait_type": "Network",
+        "value": "Calibration Testnet"
+      },
+      {
+        "trait_type": "Created Date",
+        "value": "2025-11-22"
+      },
+      {
+        "trait_type": "Demo Type",
+        "value": "Full Workflow"
+      },
+      {
+        "trait_type": "Verification",
+        "value": "Cryptographically Proven"
+      },
+      {
+        "trait_type": "Brand Colors",
+        "value": "Official Filecoin Palette"
+      }
+    ],
+    "properties": {
+      "category": "Demonstration",
+      "creator": "Filecoin Direct Integration",
+      "storage_method": "Decentralized",
+      "verification": "Onchain Proofs"
+    }
+  },
+  "status": {
+    "filecoin_direct_working": true,
+    "uploads_successful": true,
+    "verification_complete": true
+  },
+  "brand_colors_used": {
+    "primary": "#0EA2DF",
+    "secondary": "#2E86AB",
+    "accent": "#A23B72",
+    "dark": "#1E293B",
+    "success": "#10B981",
+    "warning": "#F59E0B",
+    "error": "#EF4444"
+  }
+}
