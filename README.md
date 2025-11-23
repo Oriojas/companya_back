@@ -11,14 +11,14 @@ Este contrato es un MVP refactorizado para hackathon que permite crear y gestion
 ## ✅ Estado Actual
 
 **Contrato Refactorizado Desplegado Exitosamente**
-- **Dirección**: `0x56A4CE21a649a8941C4586AE03e6bC63d4E504B5`
+- **Dirección**: `0x7644e99486CDb68aaA86F6756DfD4c08577B4fB0`
 - **Red**: Arbitrum Sepolia (Chain ID: 421614)
 - **Hash de Transacción**: `0x62a919a1d7e7d6530b87d81994a01ee2f3be4c7f08aafa3d9667817ecc99fd33`
 - **Bloque**: 217872497
 - **Versión**: 2.0.0 - Refactorizado para Hackathon
 - **Verificado**: ✅ Código disponible en Arbiscan
 
-**Ver en Arbiscan**: https://sepolia.arbiscan.io/address/0x56A4CE21a649a8941C4586AE03e6bC63d4E504B5
+**Ver en Arbiscan**: https://sepolia.arbiscan.io/address/0x7644e99486CDb68aaA86F6756DfD4c08577B4fB0
 
 ## Estados del Servicio (Simplificados)
 - **1 = CREADO**: Servicio registrado esperando acompañante
@@ -486,4 +486,4 @@ Para problemas o preguntas:
 **Versión**: 2.0.0 - Simplificado
 **Red**: Arbitrum Sepolia Testnet
 **Framework**: Hardhat
-**Contrato Actual**: `0x56A4CE21a649a8941C4586AE03e6bC63d4E504B5`
+**Contrato Actual**: `0x7644e99486CDb68aaA86F6756DfD4c08577B4fB0`
